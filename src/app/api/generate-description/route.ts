@@ -71,14 +71,17 @@ Keep the description under 150 words. Focus on benefits over just listing featur
 
   } catch (error) {
     console.error('Error in /api/generate-description:', error);
-    // Provide a generic error message to the client
-    let errorMessage = 'Internal server error.';
+    // Provide a specific error message if the API key is likely missing/invalid
+    let errorMessage = 'Internal server error during description generation.';
     if (error instanceof Error) {
-        // Log specific error internally but don't expose too much detail
         console.error("Detailed Error:", error.message);
-        if (error.message.includes('API key')) {
-            errorMessage = 'Server configuration error. Please contact support.';
+        // Check if the error message suggests an API key issue
+        if (/API key/i.test(error.message)) {
+            errorMessage = 'Invalid or missing Google Generative AI API Key. Please check server configuration (GOOGLE_GENAI_API_KEY).';
+        } else if (error.message.includes('fetch failed')) {
+             errorMessage = 'Network error communicating with the AI service. Please check connectivity.';
         }
+        // Add more specific checks if needed based on potential errors
     }
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
