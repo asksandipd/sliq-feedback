@@ -99,6 +99,11 @@ export function FeedbackSlider({
         useCORS: true,
         logging: false, // Disable logs unless debugging
         ignoreElements: (element) => element.closest('[data-feedback-ignore="true"]') !== null,
+        // Ensure full page is captured even if scrolled
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+        scrollX: -window.scrollX, // html2canvas expects negative scroll
+        scrollY: -window.scrollY,
       });
       const dataUrl = canvas.toDataURL('image/png');
       setSnapshotOverlayUrl(dataUrl);
@@ -127,46 +132,55 @@ export function FeedbackSlider({
     setSnapshots(snapshots.filter((snapshot) => snapshot.id !== id));
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+ const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
      if (drawingTool === 'none' || !canvasRef.current) return;
      setIsDrawing(true);
-     const rect = canvasRef.current.getBoundingClientRect();
-     // Calculate coordinates relative to the canvas element
-     const x = e.clientX - rect.left;
-     const y = e.clientY - rect.top;
+     const canvas = canvasRef.current;
+     const rect = canvas.getBoundingClientRect();
+     // Calculate scaling factors based on intrinsic vs displayed size
+     const scaleX = canvas.width / rect.width;
+     const scaleY = canvas.height / rect.height;
+     // Calculate coordinates relative to the canvas element and apply scaling
+     const x = (e.clientX - rect.left) * scaleX;
+     const y = (e.clientY - rect.top) * scaleY;
      setStartPoint({ x, y });
-     // Start the drawing at the click point with zero dimensions
+     // Start the drawing at the click point with zero dimensions (using scaled coords)
      setCurrentDrawing({ x, y, width: 0, height: 0, type: drawingTool, shape: drawingShape });
-  };
+ };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+ const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !startPoint || !canvasRef.current || !currentDrawing) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    // Calculate current coordinates relative to the canvas
-    const currentX = e.clientX - rect.left;
-    const currentY = e.clientY - rect.top;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    // Calculate scaling factors
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    // Calculate current coordinates relative to the canvas and scale them
+    const currentX = (e.clientX - rect.left) * scaleX;
+    const currentY = (e.clientY - rect.top) * scaleY;
 
-    // Calculate width and height relative to the starting point
+    // Calculate width and height relative to the scaled starting point
     const width = currentX - startPoint.x;
     const height = currentY - startPoint.y;
 
-    // Update the current drawing's dimensions and position
+    // Update the current drawing's dimensions and position using scaled values
     // Handle cases where the user drags left or up from the start point
     setCurrentDrawing({
       ...currentDrawing,
       width: Math.abs(width),
       height: Math.abs(height),
-      x: width < 0 ? currentX : startPoint.x, // Adjust x if dragging left
-      y: height < 0 ? currentY : startPoint.y, // Adjust y if dragging up
+      x: width < 0 ? currentX : startPoint.x, // Adjust scaled x if dragging left
+      y: height < 0 ? currentY : startPoint.y, // Adjust scaled y if dragging up
     });
-    redrawCanvas(); // Redraw with intermediate drawing shape
-  };
+    redrawCanvas(); // Redraw with intermediate drawing shape using scaled coordinates
+ };
+
 
   const handleMouseUp = () => {
     if (!isDrawing || !currentDrawing) return;
     setIsDrawing(false);
     // Add the completed drawing to the list if it has a minimum size
-    if (currentDrawing.width > 5 && currentDrawing.height > 5) { // Minimum size threshold
+    if (currentDrawing.width > 5 && currentDrawing.height > 5) { // Minimum size threshold (in scaled coords)
       setDrawings([...drawings, currentDrawing]);
     }
     // Reset current drawing state
@@ -183,22 +197,23 @@ export function FeedbackSlider({
 
     const img = new window.Image();
     img.onload = () => {
-      // Set canvas dimensions to match the image
-      canvas.width = img.width;
-      canvas.height = img.height;
-      // Draw the original snapshot image
-      ctx.drawImage(img, 0, 0);
+      // Set canvas *internal* dimensions to match the image's actual resolution
+      canvas.width = img.naturalWidth; // Use naturalWidth/Height for original dimensions
+      canvas.height = img.naturalHeight;
+
+      // Draw the original snapshot image onto the canvas buffer
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       // Combine completed drawings and the current drawing (if any)
       const allDrawings = currentDrawing ? [...drawings, currentDrawing] : drawings;
 
-      // Draw each shape
+      // Draw each shape using the stored scaled coordinates
       allDrawings.forEach(drawing => {
         ctx.globalAlpha = 1; // Reset alpha for each drawing
 
         if (drawing.type === 'highlight') {
           ctx.strokeStyle = 'hsl(var(--accent))'; // Teal color from theme
-          ctx.lineWidth = 4;
+          ctx.lineWidth = Math.max(4, canvas.width * 0.003); // Make line width relative
           ctx.globalAlpha = 0.8; // Make highlight slightly transparent
 
           if (drawing.shape === 'square') {
@@ -242,7 +257,7 @@ export function FeedbackSlider({
       });
     };
     img.src = snapshotOverlayUrl; // Load the snapshot image
-  }, [snapshotOverlayUrl, drawings, currentDrawing, drawingShape]); // Add drawingShape dependency
+  }, [snapshotOverlayUrl, drawings, currentDrawing]); // Removed drawingShape dependency as it's part of currentDrawing
 
 
   React.useEffect(() => {
@@ -403,7 +418,7 @@ export function FeedbackSlider({
              {/* Spacer */}
              <div className="flex-grow"></div>
              {/* Clear Drawings Button */}
-              <Button variant="outline" size="sm" onClick={() => setDrawings([])}>
+              <Button variant="outline" size="sm" onClick={() => { setDrawings([]); redrawCanvas(); }}>
                 Clear Drawings
               </Button>
              {/* Cancel Button */}
@@ -416,7 +431,7 @@ export function FeedbackSlider({
              </Button>
            </div>
            {/* Canvas Container */}
-           <div className="flex-grow overflow-auto p-2">
+           <div className="flex-grow overflow-auto p-2 flex items-center justify-center"> {/* Center canvas */}
              {/* Canvas for drawing */}
              <canvas
                ref={canvasRef}
@@ -424,9 +439,14 @@ export function FeedbackSlider({
                onMouseMove={handleMouseMove}
                onMouseUp={handleMouseUp}
                onMouseLeave={handleMouseUp} // End drawing if mouse leaves canvas
-               className="cursor-crosshair border border-dashed border-primary"
-               // Style to prevent image stretching and allow scrolling if needed
-               style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 150px)', display: 'block' }}
+               className="cursor-crosshair border border-dashed border-primary block" // Use block display
+               // Style to control the displayed size and allow scrolling if needed
+               // Use max-width/max-height to constrain within the viewport minus padding/toolbar
+               style={{
+                 maxWidth: 'calc(100vw - 4rem)', // Account for padding
+                 maxHeight: 'calc(100vh - 8rem)', // Account for padding and toolbar height
+                 objectFit: 'contain', // Ensure the aspect ratio is maintained
+               }}
              />
            </div>
          </div>
