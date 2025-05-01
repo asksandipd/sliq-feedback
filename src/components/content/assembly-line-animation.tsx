@@ -35,18 +35,18 @@ const CanvaIcon = () => (
 
 
 // Simple Painting representation (Rectangle)
-const PaintingRect = ({ x, y, color, width = 30, height = 40 }: { x: number; y: number; color: string; width?: number; height?: number }) => (
-  <rect x={x} y={y} width={width} height={height} fill={color} stroke="black" strokeWidth="1" rx="2" />
+const PaintingRect = ({ x, y, color, width = 30, height = 40, transform }: { x: number; y: number; color: string; width?: number; height?: number; transform?: string }) => (
+  <rect x={x} y={y} width={width} height={height} fill={color} stroke="black" strokeWidth="1" rx="2" transform={transform} />
 );
 
 // Simple Art representation (Circle)
-const PaintingCircle = ({ cx, cy, color, r = 15 }: { cx: number; cy: number; color: string; r?: number }) => (
-    <circle cx={cx} cy={cy} r={r} fill={color} stroke="black" strokeWidth="1" />
+const PaintingCircle = ({ cx, cy, color, r = 15, transform }: { cx: number; cy: number; color: string; r?: number; transform?: string }) => (
+    <circle cx={cx} cy={cy} r={r} fill={color} stroke="black" strokeWidth="1" transform={transform} />
 );
 
 // Simple Art representation (Triangle)
-const PaintingTriangle = ({ x, y, color, size=30 }: { x: number; y: number; color: string; size?:number }) => (
-    <polygon points={`${x},${y+size} ${x+size/2},${y} ${x+size},${y+size}`} fill={color} stroke="black" strokeWidth="1" />
+const PaintingTriangle = ({ x, y, color, size=30, transform }: { x: number; y: number; color: string; size?:number; transform?: string }) => (
+    <polygon points={`${x},${y+size} ${x+size/2},${y} ${x+size},${y+size}`} fill={color} stroke="black" strokeWidth="1" transform={transform} />
 );
 
 // Funnel Bin component
@@ -153,6 +153,7 @@ export function AssemblyLineAnimation() {
   const binX = outputX + 10;
   const binY = 70;
   const binBottomY = binY + binHeight;
+  const binDanceAmount = 2; // Amplitude for bin items dance
 
 
   // Item specific animations
@@ -202,6 +203,13 @@ export function AssemblyLineAnimation() {
 
   const paintingColorIndex = Math.floor((animationTime * 0.5) % colors.length);
   const paintingColor = colors[paintingColorIndex];
+
+  // Calculate dance offsets for bin items
+  const binItemDanceY1 = Math.sin(animationTime * 2.0 + 0) * binDanceAmount;
+  const binItemDanceY2 = Math.sin(animationTime * 2.2 + 1) * binDanceAmount;
+  const binItemDanceY3 = Math.sin(animationTime * 1.8 + 2) * binDanceAmount;
+  const binItemDanceY4 = Math.sin(animationTime * 2.4 + 3) * binDanceAmount;
+  const binItemDanceY5 = Math.sin(animationTime * 1.9 + 4) * binDanceAmount;
 
   return (
     <div className="w-full aspect-video bg-muted/50 rounded-md overflow-hidden flex items-center justify-center p-4">
@@ -305,13 +313,13 @@ export function AssemblyLineAnimation() {
         <text x={binX + binWidth / 2} y={binBottomY + 12} textAnchor="middle" fontSize="10" fill="hsl(var(--secondary-foreground))">Output</text>
 
         {/* Static art in bin - varied shapes and colors, adjusted positions for funnel */}
-        {/* Position items lower and slightly towards the center */}
-        <PaintingCircle cx={binX + binWidth/2} cy={binBottomY - 10} color={colors[1]} r={8} />
-        <PaintingTriangle x={binX + binWidth/2 - 15} y={binBottomY - 30} color={colors[3]} size={15} />
-        <PaintingRect x={binX + binWidth/2 + 2} y={binBottomY - 25} color={colors[0]} width={12} height={10} />
-        <PaintingCircle cx={binX + binWidth/2 + 10} cy={binBottomY - 15} color={colors[4]} r={6} />
+        {/* Position items lower and slightly towards the center, add transform for dancing */}
+        <PaintingCircle cx={binX + binWidth/2} cy={binBottomY - 10} color={colors[1]} r={8} transform={`translate(0, ${binItemDanceY1})`} />
+        <PaintingTriangle x={binX + binWidth/2 - 15} y={binBottomY - 30} color={colors[3]} size={15} transform={`translate(0, ${binItemDanceY2})`} />
+        <PaintingRect x={binX + binWidth/2 + 2} y={binBottomY - 25} color={colors[0]} width={12} height={10} transform={`translate(0, ${binItemDanceY3})`} />
+        <PaintingCircle cx={binX + binWidth/2 + 10} cy={binBottomY - 15} color={colors[4]} r={6} transform={`translate(0, ${binItemDanceY4})`} />
         {/* Add one more overlapping piece */}
-        <PaintingTriangle x={binX + binWidth / 2 - 5} y={binBottomY - 18} color={colors[2]} size={18} />
+        <PaintingTriangle x={binX + binWidth / 2 - 5} y={binBottomY - 18} color={colors[2]} size={18} transform={`translate(0, ${binItemDanceY5})`} />
 
 
       </svg>
