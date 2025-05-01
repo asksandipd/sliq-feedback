@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -64,6 +65,9 @@ export function AssemblyLineAnimation() {
 
   // Define stages and timing
   const stageStartX = [20, 150, 280, 410]; // X position for start of each stage visual
+  const stageLabelY = 10; // Adjusted Y position for stage labels
+  const stageIconY = 20; // Y position for stage icons/visuals
+
   const outputX = beltLength + 20;
   const binX = outputX + 10;
   const binY = 70;
@@ -114,22 +118,30 @@ export function AssemblyLineAnimation() {
          })}
 
 
-        {/* Stage Visuals (simple markers) */}
-        <text x={stageStartX[0]} y="40" fontSize="10" fill="hsl(var(--foreground))">Stage 1: Colors</text>
-        <circle cx={stageStartX[0] + 30} cy={20} r="8" fill={colors[0]} opacity={colorX > stageStartX[0] - 10 && colorX < stageStartX[1] -10 ? 1 : 0.3} />
-        <circle cx={stageStartX[0] + 50} cy={20} r="8" fill={colors[1]} opacity={colorX > stageStartX[0] - 10 && colorX < stageStartX[1] -10 ? 1 : 0.3} />
+        {/* Stage Visuals */}
+        {/* Stage 1 */}
+        <text x={stageStartX[0]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 1: Colors</text>
+        <circle cx={stageStartX[0] + 30} cy={stageIconY} r="8" fill={colors[0]} opacity={colorX > stageStartX[0] - 10 && colorX < stageStartX[1] -10 ? 1 : 0.3} />
+        <circle cx={stageStartX[0] + 50} cy={stageIconY} r="8" fill={colors[1]} opacity={colorX > stageStartX[0] - 10 && colorX < stageStartX[1] -10 ? 1 : 0.3} />
 
-        <text x={stageStartX[1]} y="40" fontSize="10" fill="hsl(var(--foreground))">Stage 2: Brushes</text>
-        <Paintbrush x={stageStartX[1] + 30} y={15} size={16} opacity={brushX > stageStartX[1] -10 && brushX < stageStartX[2] -10 ? 1 : 0.3} />
+        {/* Stage 2 */}
+        <text x={stageStartX[1]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 2: Brushes</text>
+        <g transform={`translate(${stageStartX[1] + 30}, ${stageIconY - 5})`} opacity={brushX > stageStartX[1] -10 && brushX < stageStartX[2] -10 ? 1 : 0.3}>
+           <Paintbrush size={16} />
+        </g>
 
-        <text x={stageStartX[2]} y="40" fontSize="10" fill="hsl(var(--foreground))">Stage 3: Pencils</text>
-        <Pencil x={stageStartX[2] + 30} y={15} size={16} opacity={pencilX > stageStartX[2] -10 && pencilX < stageStartX[3] -10 ? 1 : 0.3}/>
+        {/* Stage 3 */}
+        <text x={stageStartX[2]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 3: Pencils</text>
+         <g transform={`translate(${stageStartX[2] + 30}, ${stageIconY - 5})`} opacity={pencilX > stageStartX[2] -10 && pencilX < stageStartX[3] -10 ? 1 : 0.3}>
+            <Pencil size={16} />
+         </g>
 
-        <text x={stageStartX[3]} y="40" fontSize="10" fill="hsl(var(--foreground))">Stage 4: Design Tools</text>
-         <g transform={`translate(${stageStartX[3] + 30}, 15)`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
+        {/* Stage 4 */}
+        <text x={stageStartX[3]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 4: Design Tools</text>
+         <g transform={`translate(${stageStartX[3] + 30}, ${stageIconY - 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
             <FigmaIcon />
          </g>
-         <g transform={`translate(${stageStartX[3] + 60}, 15)`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
+         <g transform={`translate(${stageStartX[3] + 60}, ${stageIconY - 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
              <CanvaIcon />
          </g>
 
@@ -181,3 +193,4 @@ export function AssemblyLineAnimation() {
     </div>
   );
 }
+
