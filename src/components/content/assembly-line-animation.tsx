@@ -49,6 +49,65 @@ const PaintingTriangle = ({ x, y, color, size=30 }: { x: number; y: number; colo
     <polygon points={`${x},${y+size} ${x+size/2},${y} ${x+size},${y+size}`} fill={color} stroke="black" strokeWidth="1" />
 );
 
+// Funnel Bin component
+const FunnelBin = ({ x, y, width, height, stripeColor }: { x: number; y: number; width: number; height: number; stripeColor: string }) => {
+    const topWidth = width;
+    const bottomWidth = width * 0.6; // Make bottom narrower
+    const topY = y;
+    const bottomY = y + height;
+    const midY = y + height * 0.8; // Where the funnel shape ends
+
+    return (
+        <g>
+            {/* Funnel Shape */}
+            <polygon
+                points={`${x},${topY} ${x + topWidth},${topY} ${x + topWidth - (topWidth - bottomWidth) / 2},${midY} ${x + (topWidth - bottomWidth) / 2},${midY}`}
+                fill="hsl(var(--muted))"
+                stroke="hsl(var(--secondary-foreground))"
+                strokeWidth="2"
+            />
+             {/* Base Rectangle */}
+            <rect
+                x={x + (topWidth - bottomWidth) / 2}
+                y={midY}
+                width={bottomWidth}
+                height={height * 0.2}
+                fill="hsl(var(--muted))"
+                stroke="hsl(var(--secondary-foreground))"
+                strokeWidth="2"
+             />
+
+            {/* Stripes */}
+            {[...Array(5)].map((_, i) => (
+                <line
+                    key={`stripe-${i}`}
+                    x1={x + i * (topWidth / 4)}
+                    y1={topY}
+                    x2={x + (topWidth - bottomWidth) / 2 + i * (bottomWidth / 4)}
+                    y2={midY}
+                    stroke={stripeColor}
+                    strokeWidth="1.5"
+                    strokeDasharray="4 2" // Dashed stripes
+                />
+            ))}
+             {/* Base stripes */}
+             {[...Array(5)].map((_, i) => (
+                 <line
+                     key={`base-stripe-${i}`}
+                     x1={x + (topWidth - bottomWidth) / 2 + i * (bottomWidth / 4)}
+                     y1={midY}
+                     x2={x + (topWidth - bottomWidth) / 2 + i * (bottomWidth / 4)}
+                     y2={bottomY}
+                     stroke={stripeColor}
+                     strokeWidth="1.5"
+                     strokeDasharray="4 2"
+                 />
+             ))}
+        </g>
+    );
+};
+
+
 export function AssemblyLineAnimation() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [animationTime, setAnimationTime] = useState(0);
@@ -89,8 +148,12 @@ export function AssemblyLineAnimation() {
   const stageIconY = 30; // Y position for stage icons/visuals (lowered slightly)
 
   const outputX = beltLength + 20;
+  const binWidth = 60;
+  const binHeight = 70;
   const binX = outputX + 10;
   const binY = 70;
+  const binBottomY = binY + binHeight;
+
 
   // Item specific animations
   const colorDropY = 15;
@@ -128,9 +191,15 @@ export function AssemblyLineAnimation() {
   const DesignTool = animationTime % 4 < 2 ? FigmaIcon : CanvaIcon; // Alternate tools
 
   const paintingX = getItemPosition(cycleDuration * 0.8, 1);
-  const paintingFallProgress = Math.max(0, Math.min(1, (paintingX - outputX) / (binX - outputX + 30))); // 0 to 1 as it passes outputX
-  const paintingFallY = itemY + paintingFallProgress * (binY - itemY + 30); // 30 is approx height of painting rect
-  const paintingFinalX = paintingFallProgress >= 1 ? binX + 5 : paintingX; // Settle in bin
+  // Adjust falling logic for funnel bin
+  const paintingRectHeight = 30; // Approx height of the falling rectangle
+  const fallTargetY = binY + binHeight * 0.6; // Target Y inside the funnel, slightly lower
+  const paintingFallProgress = Math.max(0, Math.min(1, (paintingX - outputX + 10) / (binX - outputX + 20))); // Start falling a bit earlier
+  const paintingFallY = itemY + paintingFallProgress * (fallTargetY - itemY);
+  const paintingFinalX = paintingFallProgress >= 1 ? binX + binWidth / 2 - 15 : paintingX; // Center the item as it falls into bin (15 is half width of PaintingRect)
+  const paintingFinalRotation = paintingFallProgress * 20; // Add slight rotation while falling
+
+
   const paintingColorIndex = Math.floor((animationTime * 0.5) % colors.length);
   const paintingColor = colors[paintingColorIndex];
 
@@ -224,19 +293,26 @@ export function AssemblyLineAnimation() {
            </g>
         )}
 
-        {/* Output Art (Rectangle) */}
-        {paintingX > 0 && paintingX < binX + 40 && (
-          <PaintingRect x={paintingFinalX} y={paintingFallY} color={paintingColor} />
+        {/* Output Art (Rectangle) falling into bin */}
+        {paintingX > 0 && paintingX < binX + binWidth + 10 && ( // Extend visibility slightly
+          <g transform={`translate(${paintingFinalX}, ${paintingFallY}) rotate(${paintingFinalRotation}, 15, ${paintingRectHeight/2})`}>
+             <PaintingRect x={0} y={0} color={paintingColor} height={paintingRectHeight} />
+          </g>
         )}
 
-        {/* Output Bin */}
-        <rect x={binX} y={binY} width="50" height="60" fill="none" stroke="hsl(var(--secondary-foreground))" strokeWidth="2" rx="5" />
-        <text x={binX + 5} y={binY + 75} fontSize="10" fill="hsl(var(--secondary-foreground))">Output</text>
-        {/* Static art in bin - varied shapes and colors */}
-        <PaintingCircle cx={binX + 15} cy={binY + 20} color={colors[1]} r={10} />
-        <PaintingTriangle x={binX + 25} y={binY + 30} color={colors[3]} size={20} />
-        <PaintingRect x={binX + 8} y={binY + 40} color={colors[0]} width={20} height={15} />
-         <PaintingCircle cx={binX + 35} cy={binY + 15} color={colors[4]} r={8} />
+        {/* Output Bin (Funnel) */}
+        <FunnelBin x={binX} y={binY} width={binWidth} height={binHeight} stripeColor="hsl(var(--secondary-foreground) / 0.5)" />
+        <text x={binX + binWidth / 2} y={binBottomY + 12} textAnchor="middle" fontSize="10" fill="hsl(var(--secondary-foreground))">Output</text>
+
+        {/* Static art in bin - varied shapes and colors, adjusted positions for funnel */}
+        {/* Position items lower and slightly towards the center */}
+        <PaintingCircle cx={binX + binWidth/2} cy={binBottomY - 10} color={colors[1]} r={8} />
+        <PaintingTriangle x={binX + binWidth/2 - 15} y={binBottomY - 30} color={colors[3]} size={15} />
+        <PaintingRect x={binX + binWidth/2 + 2} y={binBottomY - 25} color={colors[0]} width={12} height={10} />
+        <PaintingCircle cx={binX + binWidth/2 + 10} cy={binBottomY - 15} color={colors[4]} r={6} />
+        {/* Add one more overlapping piece */}
+        <PaintingTriangle x={binX + binWidth / 2 - 5} y={binBottomY - 18} color={colors[2]} size={18} />
+
 
       </svg>
     </div>
