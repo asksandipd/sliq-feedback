@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Paintbrush, Pencil, Beaker, Filter as FunnelIcon } from 'lucide-react'; // Added Beaker and Filter (as Funnel)
+import { Paintbrush, Pencil, Beaker as BeakerIconLucide, Filter as FunnelIconLucide } from 'lucide-react'; // Renamed imports to avoid conflict
 import { cn } from '@/lib/utils';
 
 // Updated SVG icons for design tools
@@ -33,57 +33,92 @@ const CanvaIcon = () => (
  </svg>
 );
 
-// NEW SVG Icons
+// NEW SVG Icons with multi-color
 const AtomIcon = ({ size = 18 }: { size?: number }) => (
  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="2" fill="currentColor"/>
-    <ellipse cx="12" cy="12" rx="10" ry="4" stroke="currentColor" strokeWidth="1.5"/>
-    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" stroke="currentColor" strokeWidth="1.5"/>
-    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="12" cy="12" r="2.5" fill="hsl(var(--chart-1))"/> {/* Nucleus */}
+    <ellipse cx="12" cy="12" rx="10" ry="4" stroke="hsl(var(--chart-2))" strokeWidth="1.5"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" stroke="hsl(var(--chart-3))" strokeWidth="1.5"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" stroke="hsl(var(--chart-4))" strokeWidth="1.5"/>
     {/* Electrons */}
-    <circle cx="12" cy="8" r="1" fill="currentColor" />
-    <circle cx="5.93" cy="14.5" r="1" fill="currentColor" />
-    <circle cx="18.07" cy="9.5" r="1" fill="currentColor" />
+    <circle cx="12" cy="8" r="1.5" fill="hsl(var(--chart-5))" /> {/* Top electron */}
+    <circle cx="5.93" cy="14.5" r="1.5" fill="hsl(var(--chart-1))" /> {/* Bottom-left electron */}
+    <circle cx="18.07" cy="9.5" r="1.5" fill="hsl(var(--chart-3))" /> {/* Top-right electron */}
  </svg>
 );
 
 const SugarIcon = ({ size = 18 }: { size?: number }) => (
  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
    {/* Simple hexagon for glucose/sugar ring */}
-   <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+   <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="hsl(var(--chart-4))" strokeWidth="1.5" fill="hsl(var(--chart-4)/0.3)"/>
    {/* Add a simple 'OH' group representation */}
-   <line x1="21" y1="7" x2="23" y2="5" stroke="currentColor" strokeWidth="1.5"/>
-   <circle cx="23.5" cy="4.5" r="1" fill="currentColor"/>
+   <line x1="21" y1="7" x2="23" y2="5" stroke="hsl(var(--chart-1))" strokeWidth="1.5"/>
+   <circle cx="23.5" cy="4.5" r="1.5" fill="hsl(var(--chart-1))"/> {/* Oxygen */}
+   {/* Add another group */}
+    <line x1="3" y1="7" x2="1" y2="5" stroke="hsl(var(--chart-2))" strokeWidth="1.5"/>
+    <circle cx="0.5" cy="4.5" r="1.5" fill="hsl(var(--chart-2))"/> {/* Another group */}
  </svg>
 );
 
 const BuretteIcon = ({ size = 20 }: { size?: number }) => (
  <svg width={size} height={size*2} viewBox="0 0 20 40" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Tube */}
-    <rect x="8" y="1" width="4" height="30" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <rect x="8" y="1" width="4" height="30" stroke="hsl(var(--chart-5))" strokeWidth="1.5" fill="hsl(var(--chart-5)/0.2)"/>
     {/* Graduations */}
-    <line x1="9" y1="5" x2="11" y2="5" stroke="currentColor" strokeWidth="1"/>
-    <line x1="9" y1="10" x2="11" y2="10" stroke="currentColor" strokeWidth="1"/>
-    <line x1="9" y1="15" x2="11" y2="15" stroke="currentColor" strokeWidth="1"/>
-    <line x1="9" y1="20" x2="11" y2="20" stroke="currentColor" strokeWidth="1"/>
-    <line x1="9" y1="25" x2="11" y2="25" stroke="currentColor" strokeWidth="1"/>
+    <line x1="7" y1="5" x2="13" y2="5" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="9" y1="7.5" x2="11" y2="7.5" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="7" y1="10" x2="13" y2="10" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="9" y1="12.5" x2="11" y2="12.5" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="7" y1="15" x2="13" y2="15" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="9" y1="17.5" x2="11" y2="17.5" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="7" y1="20" x2="13" y2="20" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+     <line x1="9" y1="22.5" x2="11" y2="22.5" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
+    <line x1="7" y1="25" x2="13" y2="25" stroke="hsl(var(--chart-5))" strokeWidth="1"/>
     {/* Tip */}
-    <line x1="10" y1="31" x2="10" y2="35" stroke="currentColor" strokeWidth="1.5"/>
+    <line x1="10" y1="31" x2="10" y2="35" stroke="hsl(var(--chart-5))" strokeWidth="1.5"/>
     {/* Stopcock */}
-    <rect x="6" y="30" width="8" height="2" fill="currentColor" rx="1"/>
+    <rect x="6" y="29.5" width="8" height="3" fill="hsl(var(--chart-3))" rx="1.5"/>
+    <line x1="10" y1="29.5" x2="10" y2="32.5" stroke="hsl(var(--chart-3)/0.5)" strokeWidth="1"/>
  </svg>
 );
 
 const PipetteIcon = ({ size = 20 }: { size?: number }) => (
  <svg width={size} height={size*1.5} viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Bulb */}
-    <ellipse cx="10" cy="6" rx="5" ry="5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <ellipse cx="10" cy="6" rx="5" ry="5" stroke="hsl(var(--chart-1))" strokeWidth="1.5" fill="hsl(var(--chart-1)/0.3)"/>
     {/* Tube */}
-    <rect x="8" y="10" width="4" height="15" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <rect x="8" y="10" width="4" height="15" stroke="hsl(var(--chart-2))" strokeWidth="1.5" fill="hsl(var(--chart-2)/0.2)"/>
     {/* Tip */}
-    <line x1="10" y1="25" x2="10" y2="29" stroke="currentColor" strokeWidth="1.5"/>
+    <line x1="10" y1="25" x2="10" y2="29" stroke="hsl(var(--chart-2))" strokeWidth="1.5"/>
  </svg>
 );
+
+const BeakerIcon = ({ size = 18 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 3H19" stroke="hsl(var(--chart-3))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M7 3V9C7 10.1046 7.89543 11 9 11H15C16.1046 11 17 10.1046 17 9V3" stroke="hsl(var(--chart-3))" strokeWidth="1.5"/>
+        <path d="M7 21H17" stroke="hsl(var(--chart-3))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M7 11V21" stroke="hsl(var(--chart-3))" strokeWidth="1.5"/>
+        <path d="M17 11V21" stroke="hsl(var(--chart-3))" strokeWidth="1.5"/>
+        {/* Liquid */}
+        <path d="M9 15H15" stroke="hsl(var(--chart-2))" strokeWidth="1.5" strokeLinecap="round"/>
+         <path d="M9 18H13" stroke="hsl(var(--chart-4))" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+
+const FunnelIcon = ({ size = 18 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 4H21" stroke="hsl(var(--chart-1))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M7 8L10 14" stroke="hsl(var(--chart-1))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M17 8L14 14" stroke="hsl(var(--chart-1))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M10 14H14" stroke="hsl(var(--chart-1))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M12 14V20" stroke="hsl(var(--chart-1))" strokeWidth="1.5" strokeLinecap="round"/>
+         {/* Pouring liquid visual */}
+        <path d="M12 4V6" stroke="hsl(var(--chart-5))" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M10 6H14" stroke="hsl(var(--chart-5))" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+);
+
 
 
 // Simple Painting representation (Rectangle)
@@ -357,8 +392,9 @@ export function AssemblyLineAnimation() {
          originX = shapeWidth / 2;
          originY = shapeHeight / 2;
       } else if (shapeWidth) {
-          originX = shapeWidth;
-          originY = shapeWidth;
+          // For circle and triangle, assuming width is the primary dimension or radius
+          originX = shapeWidth / 2; // Use center for rotation
+          originY = shapeHeight ? shapeHeight / 2 : shapeWidth / 2;
       }
 
        return `translate(${translateX}, ${translateY}) rotate(${rotation}, ${originX}, ${originY}) scale(${scale})`;
@@ -414,7 +450,7 @@ export function AssemblyLineAnimation() {
              <PipetteIcon size={12}/>
          </g>
          <g transform={`translate(${stageStartX[2] + stageWidth / 2 + 20}, ${stageIconY + 5})`} opacity={(beakerX > stageStartX[2] -10 && beakerX < stageStartX[3] -10) || (funnelX > stageStartX[2] -10 && funnelX < stageStartX[3] -10)? 1 : 0.3}>
-             <Beaker size={16}/>
+             <BeakerIcon size={16}/>
          </g>
          <g transform={`translate(${stageStartX[2] + stageWidth / 2 + 45}, ${stageIconY + 5})`} opacity={(beakerX > stageStartX[2] -10 && beakerX < stageStartX[3] -10) || (funnelX > stageStartX[2] -10 && funnelX < stageStartX[3] -10)? 1 : 0.3}>
              <FunnelIcon size={16}/>
@@ -424,10 +460,10 @@ export function AssemblyLineAnimation() {
         {/* Stage 4: Art Tools */}
         <text x={stageStartX[3]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Art Tools</text>
          <g transform={`translate(${stageStartX[3] + stageWidth / 2 - 15}, ${stageIconY + 5})`} opacity={(brushX > stageStartX[3] -10 && brushX < stageStartX[4] -10) || (pencilX > stageStartX[3] -10 && pencilX < stageStartX[4] -10)? 1 : 0.3}>
-            <Paintbrush size={16} />
+            <Paintbrush size={16} color="hsl(var(--chart-2))"/> {/* Added color */}
          </g>
          <g transform={`translate(${stageStartX[3] + stageWidth / 2 + 15}, ${stageIconY + 5})`} opacity={(brushX > stageStartX[3] -10 && brushX < stageStartX[4] -10) || (pencilX > stageStartX[3] -10 && pencilX < stageStartX[4] -10)? 1 : 0.3}>
-             <Pencil size={16} />
+             <Pencil size={16} color="hsl(var(--chart-4))"/> {/* Added color */}
          </g>
 
         {/* Stage 5: Design Apps */}
@@ -478,12 +514,12 @@ export function AssemblyLineAnimation() {
           )}
          {beakerX > 0 && beakerX < beltLength && (
             <g transform={`translate(${beakerX + 10}, ${itemY + beakerYOffset}) rotate(${beakerRotation}, 8, 8)`}>
-              <Beaker size={16} />
+              <BeakerIcon size={16} />
             </g>
          )}
          {funnelX > 0 && funnelX < beltLength && (
              <g transform={`translate(${funnelX + 10}, ${itemY + funnelYOffset}) rotate(${funnelRotation}, 8, 8)`}>
-               <FunnelIcon size={16} /> {/* Using Filter icon as Funnel */}
+               <FunnelIcon size={16} />
              </g>
           )}
 
@@ -491,12 +527,12 @@ export function AssemblyLineAnimation() {
         {/* Art Tools Dancing */}
         {brushX > 0 && brushX < beltLength && (
           <g transform={`translate(${brushX + 10}, ${itemY + brushYOffset}) rotate(${brushRotation}, 8, 8)`}>
-            <Paintbrush size={16} color="hsl(var(--foreground))" />
+            <Paintbrush size={16} color="hsl(var(--chart-2))" /> {/* Match stage icon color */}
           </g>
         )}
         {pencilX > 0 && pencilX < beltLength && (
           <g transform={`translate(${pencilX + 10}, ${itemY + pencilYOffset}) rotate(${pencilRotation}, 8, 8)`}>
-            <Pencil size={16} color="hsl(var(--foreground))" />
+            <Pencil size={16} color="hsl(var(--chart-4))" /> {/* Match stage icon color */}
           </g>
         )}
 
@@ -525,35 +561,36 @@ export function AssemblyLineAnimation() {
                    x={binX + (binWidth - binWidth * 0.6) / 2}
                    y={binY + binHeight * 0.8}
                    width={binWidth * 0.6}
-                   height={binHeight * 0.2 + 5}
+                   height={binHeight * 0.2 + 5} // Add slight extra height to prevent clipping at bottom
                 />
            </clipPath>
         </defs>
 
         <g clipPath="url(#binClipPath)">
             {/* Items dancing inside the bin */}
-            <PaintingCircle
-                 cx={0} cy={0}
+             {/* Use getBinItemTransform with correct dimensions for each shape */}
+             <PaintingCircle
+                 cx={0} cy={0} // Center origin for circle
                  color={colors[1]} r={8}
-                 transform={getBinItemTransform(0, 8, 8)}
+                 transform={getBinItemTransform(0, 16, 16)} // Use diameter for width/height
              />
              <PaintingTriangle
-                 x={0} y={0}
+                 x={-7.5} y={-7.5} // Adjust origin for triangle based on size
                  color={colors[3]} size={15}
                  transform={getBinItemTransform(1, 15, 15)}
              />
              <PaintingRect
-                 x={0} y={0}
+                 x={-6} y={-5} // Adjust origin for rectangle based on size
                  color={colors[0]} width={12} height={10}
                  transform={getBinItemTransform(2, 12, 10)}
              />
              <PaintingCircle
-                 cx={0} cy={0}
+                 cx={0} cy={0} // Center origin
                  color={colors[4]} r={6}
-                 transform={getBinItemTransform(3, 6, 6)}
+                 transform={getBinItemTransform(3, 12, 12)} // Use diameter
              />
              <PaintingTriangle
-                 x={0} y={0}
+                 x={-9} y={-9} // Adjust origin
                  color={colors[2]} size={18}
                  transform={getBinItemTransform(4, 18, 18)}
               />
@@ -568,3 +605,4 @@ export function AssemblyLineAnimation() {
     </div>
   );
 }
+
