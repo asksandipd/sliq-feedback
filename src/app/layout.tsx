@@ -19,7 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning> {/* Added suppressHydrationWarning for potential date/random mismatches if any */}
+    <html lang="en" suppressHydrationWarning>
+      <head /> {/* Add explicit empty head tag to ensure proper structure */}
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased flex flex-col',
