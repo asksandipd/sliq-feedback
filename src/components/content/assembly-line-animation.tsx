@@ -411,53 +411,72 @@ export function AssemblyLineAnimation() {
   const binBaseY = binBottomY - 15;
   const binBaseRadius = binWidth * 0.2;
 
+  // Updated binItemTransforms array with 5 items
   const binItemTransforms = [
-      { // Circle
+      { // Circle 1
           baseX: binCenterX - binBaseRadius * 0.5,
           baseY: binBaseY - binBaseRadius * 0.2,
           angle: vortexAngle(animationTime, 0, 1.0),
           yOffset: verticalOffset(animationTime, 0, 1.0),
           scale: 1 + Math.sin(animationTime * 1.5 + 0) * 0.05,
           rotation: Math.sin(animationTime * 1.1 + 0) * 15,
+          color: colors[1],
+          shape: 'circle',
+          size: 16,
       },
-      { // Triangle
+      { // Triangle 1
           baseX: binCenterX + binBaseRadius * 0.3,
           baseY: binBaseY + binBaseRadius * 0.4,
           angle: vortexAngle(animationTime, 1, 1.2),
           yOffset: verticalOffset(animationTime, 1, 1.1),
           scale: 1 + Math.sin(animationTime * 1.6 + 1) * 0.04,
           rotation: Math.cos(animationTime * 1.3 + 1) * 20,
+          color: colors[3],
+          shape: 'triangle',
+          size: 15,
       },
-      { // Rect
+      { // Rectangle 1
           baseX: binCenterX + binBaseRadius * 0.6,
           baseY: binBaseY - binBaseRadius * 0.5,
           angle: vortexAngle(animationTime, 2, 0.9),
           yOffset: verticalOffset(animationTime, 2, 0.9),
           scale: 1 + Math.sin(animationTime * 1.4 + 2) * 0.06,
           rotation: Math.sin(animationTime * 1.0 + 2) * 10,
+          color: colors[0],
+          shape: 'rect',
+          width: 12,
+          height: 10,
       },
-      { // Small Circle
+      { // Circle 2 (smaller)
           baseX: binCenterX + binBaseRadius * 0.1,
           baseY: binBaseY + binBaseRadius * 0.1,
           angle: vortexAngle(animationTime, 3, 1.3),
           yOffset: verticalOffset(animationTime, 3, 1.2),
           scale: 1 + Math.sin(animationTime * 1.7 + 3) * 0.045,
           rotation: Math.cos(animationTime * 1.2 + 3) * 25,
+          color: colors[4],
+          shape: 'circle',
+          size: 12,
       },
-      { // Small Triangle
+      { // Triangle 2 (larger)
           baseX: binCenterX - binBaseRadius * 0.7,
           baseY: binBaseY + binBaseRadius * 0.3,
           angle: vortexAngle(animationTime, 4, 1.1),
           yOffset: verticalOffset(animationTime, 4, 1.05),
           scale: 1 + Math.sin(animationTime * 1.55 + 4) * 0.055,
           rotation: Math.sin(animationTime * 1.4 + 4) * 18,
+          color: colors[2],
+          shape: 'triangle',
+          size: 18,
       },
   ];
 
-  const getBinItemTransform = (index: number, shapeWidth = 0, shapeHeight = 0) => {
-      const { baseX, baseY, angle, yOffset, scale, rotation } = binItemTransforms[index];
+
+  const getBinItemTransform = (index: number) => {
+      const item = binItemTransforms[index];
+      const { baseX, baseY, angle, yOffset, scale, rotation } = item;
       const vortexX = Math.cos(angle) * binVortexRadius;
-      const vortexY = Math.sin(angle) * binVortexRadius * 0.5;
+      const vortexY = Math.sin(angle) * binVortexRadius * 0.5; // Make vortex more elliptical
 
       const translateX = baseX + vortexX;
       const translateY = baseY + vortexY + yOffset;
@@ -465,15 +484,21 @@ export function AssemblyLineAnimation() {
       let originX = 0;
       let originY = 0;
 
-      if (shapeWidth && shapeHeight) {
-         originX = shapeWidth / 2;
-         originY = shapeHeight / 2;
-      } else if (shapeWidth) {
-          // For circle and triangle, assuming width is the primary dimension or radius
-          originX = shapeWidth / 2; // Use center for rotation
-          originY = shapeHeight ? shapeHeight / 2 : shapeWidth / 2;
+      // Calculate origin based on shape type and dimensions
+      if (item.shape === 'rect') {
+          originX = item.width! / 2;
+          originY = item.height! / 2;
+      } else if (item.shape === 'circle') {
+          originX = 0; // SVG circles are centered at cx, cy
+          originY = 0;
+      } else if (item.shape === 'triangle') {
+          // Adjust origin for triangle based on its points relative to its defined x, y
+          originX = item.size! / 2; // Center of the base
+          originY = item.size! / 2; // Approx center y
       }
 
+       // Apply translation, rotation, and scale
+       // Note: Translate is applied first, then rotate around the origin, then scale
        return `translate(${translateX}, ${translateY}) rotate(${rotation}, ${originX}, ${originY}) scale(${scale})`;
   };
 
@@ -781,33 +806,50 @@ export function AssemblyLineAnimation() {
         </defs>
 
         <g clipPath="url(#binClipPath)">
-            {/* Items dancing inside the bin */}
-             {/* Use getBinItemTransform with correct dimensions for each shape */}
-             <PaintingCircle
-                 cx={0} cy={0} // Center origin for circle
-                 color={colors[1]} r={8}
-                 transform={getBinItemTransform(0, 16, 16)} // Use diameter for width/height
-             />
-             <PaintingTriangle
-                 x={-7.5} y={-7.5} // Adjust origin for triangle based on size
-                 color={colors[3]} size={15}
-                 transform={getBinItemTransform(1, 15, 15)}
-             />
-             <PaintingRect
-                 x={-6} y={-5} // Adjust origin for rectangle based on size
-                 color={colors[0]} width={12} height={10}
-                 transform={getBinItemTransform(2, 12, 10)}
-             />
-             <PaintingCircle
-                 cx={0} cy={0} // Center origin
-                 color={colors[4]} r={6}
-                 transform={getBinItemTransform(3, 12, 12)} // Use diameter
-             />
-             <PaintingTriangle
-                 x={-9} y={-9} // Adjust origin
-                 color={colors[2]} size={18}
-                 transform={getBinItemTransform(4, 18, 18)}
-              />
+          {/* Items dancing inside the bin - Render all 5 items */}
+          {binItemTransforms.map((item, index) => {
+            const transform = getBinItemTransform(index);
+            switch (item.shape) {
+              case 'circle':
+                return (
+                  <PaintingCircle
+                    key={`bin-item-${index}`}
+                    cx={0} // Positioned by transform
+                    cy={0} // Positioned by transform
+                    color={item.color}
+                    r={item.size! / 2} // Radius is half the size
+                    transform={transform}
+                  />
+                );
+              case 'triangle':
+                return (
+                  <PaintingTriangle
+                    key={`bin-item-${index}`}
+                     // Adjust x/y so the triangle's center aligns with the transform origin
+                    x={-item.size! / 2} // Start x to center the base
+                    y={-item.size! / 2} // Start y approx center
+                    color={item.color}
+                    size={item.size!}
+                    transform={transform}
+                  />
+                );
+              case 'rect':
+                return (
+                  <PaintingRect
+                    key={`bin-item-${index}`}
+                    // Adjust x/y so the rectangle's center aligns with the transform origin
+                    x={-item.width! / 2}
+                    y={-item.height! / 2}
+                    color={item.color}
+                    width={item.width!}
+                    height={item.height!}
+                    transform={transform}
+                  />
+                );
+              default:
+                return null;
+            }
+          })}
         </g>
 
 
