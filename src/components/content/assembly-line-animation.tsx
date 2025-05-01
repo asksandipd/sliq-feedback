@@ -61,7 +61,7 @@ const SugarIcon = ({ size = 18 }: { size?: number }) => (
 );
 
 const BuretteIcon = ({ size = 20 }: { size?: number }) => (
- <svg width={size} height={size*2} viewBox="0 0 20 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+ <svg width={size} height={size ? size*2 : 40} viewBox="0 0 20 40" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Tube */}
     <rect x="8" y="1" width="4" height="30" stroke="hsl(var(--chart-5))" strokeWidth="1.5" fill="hsl(var(--chart-5)/0.2)"/>
     {/* Graduations */}
@@ -83,7 +83,7 @@ const BuretteIcon = ({ size = 20 }: { size?: number }) => (
 );
 
 const PipetteIcon = ({ size = 20 }: { size?: number }) => (
- <svg width={size} height={size*1.5} viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+ <svg width={size} height={size ? size*1.5 : 30} viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Bulb */}
     <ellipse cx="10" cy="6" rx="5" ry="5" stroke="hsl(var(--chart-1))" strokeWidth="1.5" fill="hsl(var(--chart-1)/0.3)"/>
     {/* Tube */}
@@ -219,6 +219,7 @@ export function AssemblyLineAnimation() {
   const beltSpeed = 40; // Reduced speed slightly
   const beltLength = 600; // Increased belt length for more stages
   const cycleDuration = beltLength / beltSpeed; // Time for one item to cross
+  const svgWidth = beltLength + 100; // Adjusted SVG width to accommodate the bin
 
   // Calculate item positions based on time - adding a random offset for less uniformity
   const getItemPosition = (stageStartTime: number, stageDuration: number, initialOffset = 0) => {
@@ -241,7 +242,7 @@ export function AssemblyLineAnimation() {
   const outputX = beltLength + 20;
   const binWidth = 60;
   const binHeight = 70;
-  const binX = outputX + 10;
+  const binX = outputX + 10; // Position bin relative to outputX
   const binY = 70;
   const binBottomY = binY + binHeight;
   const binCenterX = binX + binWidth / 2;
@@ -403,7 +404,7 @@ export function AssemblyLineAnimation() {
 
   return (
     <div className="w-full aspect-video bg-muted/50 rounded-md overflow-hidden flex items-center justify-center p-4">
-      <svg ref={svgRef} viewBox="0 0 650 150" width="100%" height="100%" className="overflow-visible"> {/* Increased viewbox width */}
+      <svg ref={svgRef} viewBox={`0 0 ${svgWidth} 150`} width="100%" height="100%" className="overflow-visible"> {/* Adjusted viewbox width */}
         {/* Conveyor Belt */}
         <rect x="10" y="80" width={beltLength + 20} height="10" fill="hsl(var(--muted-foreground))" rx="3" />
         <rect x="10" y="50" width={beltLength + 20} height="10" fill="hsl(var(--muted-foreground))" rx="3" />
