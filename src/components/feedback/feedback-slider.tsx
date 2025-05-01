@@ -131,42 +131,51 @@ export function FeedbackSlider({
      if (drawingTool === 'none' || !canvasRef.current) return;
      setIsDrawing(true);
      const rect = canvasRef.current.getBoundingClientRect();
+     // Calculate coordinates relative to the canvas element
      const x = e.clientX - rect.left;
      const y = e.clientY - rect.top;
      setStartPoint({ x, y });
+     // Start the drawing at the click point with zero dimensions
      setCurrentDrawing({ x, y, width: 0, height: 0, type: drawingTool, shape: drawingShape });
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !startPoint || !canvasRef.current || !currentDrawing) return;
     const rect = canvasRef.current.getBoundingClientRect();
+    // Calculate current coordinates relative to the canvas
     const currentX = e.clientX - rect.left;
     const currentY = e.clientY - rect.top;
 
+    // Calculate width and height relative to the starting point
     const width = currentX - startPoint.x;
     const height = currentY - startPoint.y;
 
+    // Update the current drawing's dimensions and position
+    // Handle cases where the user drags left or up from the start point
     setCurrentDrawing({
       ...currentDrawing,
       width: Math.abs(width),
       height: Math.abs(height),
-      x: width < 0 ? currentX : startPoint.x,
-      y: height < 0 ? currentY : startPoint.y,
+      x: width < 0 ? currentX : startPoint.x, // Adjust x if dragging left
+      y: height < 0 ? currentY : startPoint.y, // Adjust y if dragging up
     });
-    redrawCanvas(); // Redraw with intermediate drawing
+    redrawCanvas(); // Redraw with intermediate drawing shape
   };
 
   const handleMouseUp = () => {
     if (!isDrawing || !currentDrawing) return;
     setIsDrawing(false);
+    // Add the completed drawing to the list if it has a minimum size
     if (currentDrawing.width > 5 && currentDrawing.height > 5) { // Minimum size threshold
       setDrawings([...drawings, currentDrawing]);
     }
+    // Reset current drawing state
     setCurrentDrawing(null);
     setStartPoint(null);
-    redrawCanvas(); // Redraw final state
+    redrawCanvas(); // Redraw final state without the intermediate shape
   };
 
+  // Use useCallback to memoize redrawCanvas function
   const redrawCanvas = React.useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -174,56 +183,70 @@ export function FeedbackSlider({
 
     const img = new window.Image();
     img.onload = () => {
+      // Set canvas dimensions to match the image
       canvas.width = img.width;
       canvas.height = img.height;
+      // Draw the original snapshot image
       ctx.drawImage(img, 0, 0);
 
+      // Combine completed drawings and the current drawing (if any)
       const allDrawings = currentDrawing ? [...drawings, currentDrawing] : drawings;
 
+      // Draw each shape
       allDrawings.forEach(drawing => {
-        ctx.globalAlpha = 1; // Reset alpha for subsequent drawings
+        ctx.globalAlpha = 1; // Reset alpha for each drawing
+
         if (drawing.type === 'highlight') {
-          ctx.strokeStyle = 'hsl(var(--accent))'; // Teal
+          ctx.strokeStyle = 'hsl(var(--accent))'; // Teal color from theme
           ctx.lineWidth = 4;
           ctx.globalAlpha = 0.8; // Make highlight slightly transparent
+
           if (drawing.shape === 'square') {
             ctx.strokeRect(drawing.x, drawing.y, drawing.width, drawing.height);
-          } else { // circle
+          } else { // circle/ellipse
              ctx.beginPath();
+             // Draw an ellipse centered within the bounding box
              ctx.ellipse(
                drawing.x + drawing.width / 2,
                drawing.y + drawing.height / 2,
-               drawing.width / 2,
-               drawing.height / 2,
-               0, 0, 2 * Math.PI
+               drawing.width / 2, // radiusX
+               drawing.height / 2, // radiusY
+               0, // rotation
+               0, // startAngle
+               2 * Math.PI // endAngle
              );
              ctx.stroke();
           }
         } else if (drawing.type === 'hide') {
           ctx.fillStyle = 'black';
           ctx.globalAlpha = 1; // Ensure black is fully opaque
+
            if (drawing.shape === 'square') {
               ctx.fillRect(drawing.x, drawing.y, drawing.width, drawing.height);
-           } else { // circle
+           } else { // circle/ellipse
                ctx.beginPath();
+               // Draw a filled ellipse centered within the bounding box
                ctx.ellipse(
                  drawing.x + drawing.width / 2,
                  drawing.y + drawing.height / 2,
-                 drawing.width / 2,
-                 drawing.height / 2,
-                 0, 0, 2 * Math.PI
+                 drawing.width / 2, // radiusX
+                 drawing.height / 2, // radiusY
+                 0, // rotation
+                 0, // startAngle
+                 2 * Math.PI // endAngle
                );
                ctx.fill();
            }
         }
-         ctx.globalAlpha = 1; // Reset alpha
+         ctx.globalAlpha = 1; // Reset alpha after drawing each shape
       });
     };
-    img.src = snapshotOverlayUrl;
-  }, [snapshotOverlayUrl, drawings, currentDrawing]);
+    img.src = snapshotOverlayUrl; // Load the snapshot image
+  }, [snapshotOverlayUrl, drawings, currentDrawing, drawingShape]); // Add drawingShape dependency
 
 
   React.useEffect(() => {
+    // Redraw the canvas whenever the snapshot URL, drawings, or current drawing changes
     if (snapshotOverlayUrl && canvasRef.current) {
       redrawCanvas();
     }
@@ -232,24 +255,29 @@ export function FeedbackSlider({
   const finishDrawing = () => {
       const canvas = canvasRef.current;
       if (canvas) {
+           // Get the final image data URL with drawings applied
            const finalDataUrl = canvas.toDataURL('image/png');
            const newSnapshot: Snapshot = {
              id: `snapshot-${Date.now()}`,
              dataUrl: finalDataUrl,
            };
-           setSnapshots([...snapshots, newSnapshot]);
+           setSnapshots([...snapshots, newSnapshot]); // Add annotated snapshot
       }
+      // Reset drawing state
       setSnapshotOverlayUrl(null);
       setIsCapturing(false);
       onOpenChange(true); // Reopen slider
-      setDrawingTool('none'); // Reset tool
+      setDrawingTool('none');
+      setDrawings([]); // Clear drawings for next capture
   };
 
   const cancelDrawing = () => {
+      // Reset drawing state without saving
       setSnapshotOverlayUrl(null);
       setIsCapturing(false);
       onOpenChange(true); // Reopen slider
-      setDrawingTool('none'); // Reset tool
+      setDrawingTool('none');
+      setDrawings([]); // Clear drawings
   };
 
 
@@ -327,6 +355,7 @@ export function FeedbackSlider({
     }
   }
 
+  // Render the drawing overlay if a snapshot URL is available
   if (snapshotOverlayUrl) {
      return (
        <div data-feedback-ignore="true" className="fixed inset-0 z-50 bg-black/50 flex flex-col items-center justify-center p-4">
@@ -334,6 +363,7 @@ export function FeedbackSlider({
            {/* Drawing Toolbar */}
            <div className="p-2 border-b flex items-center justify-center space-x-2 bg-muted">
              <span className="text-sm font-medium mr-4">Drawing Tools:</span>
+             {/* Highlight Button */}
              <Button
                variant={drawingTool === 'highlight' ? 'default' : 'outline'}
                size="sm"
@@ -342,6 +372,7 @@ export function FeedbackSlider({
              >
                <Edit2 className="mr-1 h-4 w-4" /> Highlight
              </Button>
+             {/* Hide Button */}
              <Button
                 variant={drawingTool === 'hide' ? 'destructive' : 'outline'}
                 size="sm"
@@ -349,44 +380,53 @@ export function FeedbackSlider({
              >
                 <XCircle className="mr-1 h-4 w-4" /> Hide
              </Button>
+             {/* Separator */}
              <div className="border-l h-6 mx-2"></div>
+             {/* Square Shape Button */}
              <Button
                 variant={drawingShape === 'square' ? 'secondary' : 'ghost'}
                 size="icon"
                 onClick={() => setDrawingShape('square')}
-                title="Draw Square"
+                title="Draw Square/Rectangle"
              >
                 <Square className="h-4 w-4" />
              </Button>
+             {/* Circle Shape Button */}
               <Button
                 variant={drawingShape === 'circle' ? 'secondary' : 'ghost'}
                 size="icon"
                 onClick={() => setDrawingShape('circle')}
-                title="Draw Circle"
+                title="Draw Circle/Ellipse"
              >
                 <CircleIcon className="h-4 w-4" />
              </Button>
+             {/* Spacer */}
              <div className="flex-grow"></div>
+             {/* Clear Drawings Button */}
               <Button variant="outline" size="sm" onClick={() => setDrawings([])}>
                 Clear Drawings
               </Button>
+             {/* Cancel Button */}
              <Button variant="ghost" size="sm" onClick={cancelDrawing} className="text-destructive hover:bg-destructive/10">
                Cancel
              </Button>
+             {/* Done Button */}
              <Button size="sm" onClick={finishDrawing}>
                Done
              </Button>
            </div>
-           {/* Canvas */}
+           {/* Canvas Container */}
            <div className="flex-grow overflow-auto p-2">
+             {/* Canvas for drawing */}
              <canvas
                ref={canvasRef}
                onMouseDown={handleMouseDown}
                onMouseMove={handleMouseMove}
                onMouseUp={handleMouseUp}
-               onMouseLeave={handleMouseUp} // Treat leaving canvas as mouse up
+               onMouseLeave={handleMouseUp} // End drawing if mouse leaves canvas
                className="cursor-crosshair border border-dashed border-primary"
-               style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 150px)', display: 'block' }} // Adjust max height as needed
+               // Style to prevent image stretching and allow scrolling if needed
+               style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 150px)', display: 'block' }}
              />
            </div>
          </div>
@@ -395,6 +435,7 @@ export function FeedbackSlider({
    }
 
 
+  // Render the main feedback sheet
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent data-feedback-ignore="true" className="sm:max-w-md flex flex-col">
@@ -403,9 +444,10 @@ export function FeedbackSlider({
         </SheetHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-grow overflow-hidden">
-             <div className="flex-grow overflow-y-auto pr-6 pl-1 -mr-6"> {/* Scrollable content area */}
+             {/* Scrollable area for form content */}
+             <div className="flex-grow overflow-y-auto pr-6 pl-1 -mr-6">
                 <div className="space-y-4 py-4">
-                   {/* Snapshots Grid */}
+                   {/* Snapshots Section */}
                    <div className="space-y-2">
                      <Label>Snapshots</Label>
                      <ScrollArea className="h-40 w-full rounded-md border p-2">
@@ -414,6 +456,7 @@ export function FeedbackSlider({
                            No snapshots captured yet.
                          </div>
                        ) : (
+                         // Grid to display captured snapshots
                          <div className="grid grid-cols-2 gap-2">
                            {snapshots.map((snapshot) => (
                              <div key={snapshot.id} className="relative group aspect-video">
@@ -424,6 +467,7 @@ export function FeedbackSlider({
                                  objectFit="cover"
                                  className="rounded"
                                />
+                               {/* Delete button for each snapshot */}
                                <Button
                                  type="button"
                                  variant="destructive"
@@ -439,12 +483,13 @@ export function FeedbackSlider({
                          </div>
                        )}
                      </ScrollArea>
+                     {/* Button to capture a new snapshot */}
                      <Button type="button" variant="outline" onClick={captureSnapshot} disabled={isCapturing} className="w-full">
                        <Camera className="mr-2 h-4 w-4" /> {isCapturing ? 'Initializing...' : 'Capture Snapshot'}
                      </Button>
                    </div>
 
-                   {/* Description */}
+                   {/* Feedback Description Textarea */}
                    <FormField
                      control={form.control}
                      name="description"
@@ -458,13 +503,14 @@ export function FeedbackSlider({
                              {...field}
                            />
                          </FormControl>
-                         <FormMessage />
+                         <FormMessage /> {/* Display validation errors */}
                        </FormItem>
                      )}
                    />
 
-                   {/* Options */}
+                   {/* Options Checkboxes */}
                    <div className="space-y-2">
+                       {/* Include Account Info Checkbox */}
                        <FormField
                           control={form.control}
                           name="includeAccountInfo"
@@ -482,6 +528,7 @@ export function FeedbackSlider({
                             </FormItem>
                           )}
                         />
+                       {/* Include System Info Checkbox */}
                        <FormField
                          control={form.control}
                          name="includeSystemInfo"
@@ -503,6 +550,7 @@ export function FeedbackSlider({
                 </div>
              </div>
 
+            {/* Sheet Footer with Action Buttons */}
             <SheetFooter className="mt-auto pt-4 border-t">
               <SheetClose asChild>
                 <Button type="button" variant="outline">Cancel</Button>
