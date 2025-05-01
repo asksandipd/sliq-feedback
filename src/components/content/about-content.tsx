@@ -21,7 +21,7 @@ export function AboutContent() {
                    The core feature is the feedback slider, which leverages `html2canvas` to capture screenshots and provides basic annotation tools, allowing users to give precise visual feedback.
                  </p>
               </div>
-               <div className="md:w-1/3 relative aspect-square">
+               <div className="md:w-1/3 relative aspect-video">
                    <Image
                      src="https://picsum.photos/400/400"
                      alt="Team or technology collage"
@@ -32,6 +32,7 @@ export function AboutContent() {
                    />
               </div>
            </div>
+           {/* Removed AI product description generation section from here */}
         </CardContent>
       </Card>
        <Card>
@@ -49,6 +50,8 @@ export function AboutContent() {
                 <li>html2canvas</li>
                 <li>Zod</li>
                 <li>React Hook Form</li>
+                <li>Genkit (for AI features)</li> {/* Added Genkit */}
+                <li>Google Gemini</li> {/* Added Gemini */}
             </ul>
         </CardContent>
       </Card>
