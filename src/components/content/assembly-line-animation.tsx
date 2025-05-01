@@ -235,8 +235,8 @@ export function AssemblyLineAnimation() {
   const numStages = 6;
   const stageWidth = beltLength / numStages;
   const stageStartX = Array.from({ length: numStages }, (_, i) => 20 + i * stageWidth);
-  const stageLabelY = 10;
-  const stageIconY = 30; // Y position for stage icons/visuals
+  const stageLabelY = 15; // Adjusted Y position for labels
+  const stageIconY = 35; // Adjusted Y position for stage icons/visuals
 
 
   const outputX = beltLength + 20;
@@ -252,8 +252,8 @@ export function AssemblyLineAnimation() {
   const binVerticalSpeed = 1.8;
 
   // Item specific animations
-  const colorDropY = 15;
-  const itemY = 60;
+  const colorDropY = 20; // Adjusted drop Y
+  const itemY = 65; // Adjusted item Y
   const itemDanceAmount = 5;
 
   const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -402,6 +402,21 @@ export function AssemblyLineAnimation() {
   };
 
 
+  // Helper function to check if an item is within a specific stage
+  const isItemInStage = (itemX: number, stageIndex: number) => {
+    const stageStart = stageStartX[stageIndex] - 10; // Small buffer
+    const stageEnd = stageStartX[stageIndex + 1] - 10;
+    return itemX > stageStart && itemX < stageEnd;
+  };
+
+  // Stage Activation States
+  const stage1Active = isItemInStage(colorX, 0);
+  const stage2Active = isItemInStage(atomX, 1) || isItemInStage(sugarX, 1);
+  const stage3Active = isItemInStage(buretteX, 2) || isItemInStage(pipetteX, 2) || isItemInStage(beakerX, 2) || isItemInStage(funnelX, 2);
+  const stage4Active = isItemInStage(brushX, 3) || isItemInStage(pencilX, 3);
+  const stage5Active = isItemInStage(designToolX, 4);
+  // Stage 6 (Output) doesn't need an active state for highlight
+
   return (
     <div className="w-full aspect-video bg-muted/50 rounded-md overflow-hidden flex items-center justify-center p-4">
       <svg ref={svgRef} viewBox={`0 0 ${svgWidth} 150`} width="100%" height="100%" className="overflow-visible"> {/* Adjusted viewbox width */}
@@ -421,58 +436,163 @@ export function AssemblyLineAnimation() {
 
         {/* Stage Visuals */}
         {/* Stage 1: Colors */}
-        <text x={stageStartX[0]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Colors</text>
-        {pentagonPoints.map((point, i) => (
-          <circle
-            key={`color-dot-${i}`}
-            cx={point.x}
-            cy={point.y}
-            r="6"
-            fill={colors[i % colors.length]}
-            opacity={colorX > stageStartX[0] - 10 && colorX < stageStartX[1] - 10 ? 1 : 0.3}
-          />
-        ))}
+        <text
+          x={stageStartX[0]}
+          y={stageLabelY}
+          fontSize="10"
+          fill="hsl(var(--foreground))"
+          className={cn(
+            "transition-all duration-200",
+            stage1Active ? "font-bold scale-110 opacity-100 fill-primary" : "opacity-70"
+          )}
+          style={{ transformOrigin: `${stageStartX[0]}px ${stageLabelY}px` }} // Center scaling transform
+        >
+          Colors
+        </text>
+        <g
+         className={cn("transition-all duration-200", stage1Active ? "scale-110 opacity-100" : "opacity-70")}
+         style={{ transformOrigin: `${pentagonCenterX}px ${pentagonCenterY}px` }}
+        >
+          {pentagonPoints.map((point, i) => (
+            <circle
+              key={`color-dot-${i}`}
+              cx={point.x}
+              cy={point.y}
+              r="6"
+              fill={colors[i % colors.length]}
+              className={cn("transition-opacity duration-200", stage1Active ? "opacity-100" : "opacity-50")} // Adjust opacity within the group
+            />
+          ))}
+        </g>
 
         {/* Stage 2: Basics (Atoms, Sugar) */}
-        <text x={stageStartX[1]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Basics</text>
-        <g transform={`translate(${stageStartX[1] + stageWidth / 2 - 20}, ${stageIconY + 5})`} opacity={(atomX > stageStartX[1] -10 && atomX < stageStartX[2] -10) || (sugarX > stageStartX[1] -10 && sugarX < stageStartX[2] -10) ? 1 : 0.3}>
+         <text
+          x={stageStartX[1]}
+          y={stageLabelY}
+          fontSize="10"
+          fill="hsl(var(--foreground))"
+          className={cn(
+            "transition-all duration-200",
+            stage2Active ? "font-bold scale-110 opacity-100 fill-primary" : "opacity-70"
+          )}
+           style={{ transformOrigin: `${stageStartX[1]}px ${stageLabelY}px` }}
+         >
+           Basics
+         </text>
+        <g
+          transform={`translate(${stageStartX[1] + stageWidth / 2 - 20}, ${stageIconY + 5})`}
+          className={cn("transition-all duration-200", stage2Active ? "scale-110 opacity-100" : "opacity-70")}
+           style={{ transformOrigin: `center center` }}
+        >
            <AtomIcon size={16} />
         </g>
-         <g transform={`translate(${stageStartX[1] + stageWidth / 2 + 10}, ${stageIconY + 5})`} opacity={(atomX > stageStartX[1] -10 && atomX < stageStartX[2] -10) || (sugarX > stageStartX[1] -10 && sugarX < stageStartX[2] -10) ? 1 : 0.3}>
+         <g
+          transform={`translate(${stageStartX[1] + stageWidth / 2 + 10}, ${stageIconY + 5})`}
+          className={cn("transition-all duration-200", stage2Active ? "scale-110 opacity-100" : "opacity-70")}
+          style={{ transformOrigin: `center center` }}
+        >
            <SugarIcon size={16} />
         </g>
 
         {/* Stage 3: Lab Gear */}
-        <text x={stageStartX[2]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Lab Gear</text>
-         <g transform={`translate(${stageStartX[2] + stageWidth / 2 - 30}, ${stageIconY})`} opacity={(buretteX > stageStartX[2] -10 && buretteX < stageStartX[3] -10) || (pipetteX > stageStartX[2] -10 && pipetteX < stageStartX[3] -10) ? 1 : 0.3}>
+        <text
+          x={stageStartX[2]}
+          y={stageLabelY}
+          fontSize="10"
+          fill="hsl(var(--foreground))"
+          className={cn(
+            "transition-all duration-200",
+            stage3Active ? "font-bold scale-110 opacity-100 fill-primary" : "opacity-70"
+          )}
+           style={{ transformOrigin: `${stageStartX[2]}px ${stageLabelY}px` }}
+        >
+          Lab Gear
+        </text>
+         <g
+          transform={`translate(${stageStartX[2] + stageWidth / 2 - 30}, ${stageIconY})`}
+          className={cn("transition-all duration-200", stage3Active ? "scale-110 opacity-100" : "opacity-70")}
+           style={{ transformOrigin: `center bottom` }} // Adjust origin for taller icons
+         >
             <BuretteIcon size={12}/>
          </g>
-         <g transform={`translate(${stageStartX[2] + stageWidth / 2 - 5}, ${stageIconY})`} opacity={(buretteX > stageStartX[2] -10 && buretteX < stageStartX[3] -10) || (pipetteX > stageStartX[2] -10 && pipetteX < stageStartX[3] -10) ? 1 : 0.3}>
+         <g
+            transform={`translate(${stageStartX[2] + stageWidth / 2 - 5}, ${stageIconY})`}
+            className={cn("transition-all duration-200", stage3Active ? "scale-110 opacity-100" : "opacity-70")}
+            style={{ transformOrigin: `center bottom` }}
+         >
              <PipetteIcon size={12}/>
          </g>
-         <g transform={`translate(${stageStartX[2] + stageWidth / 2 + 20}, ${stageIconY + 5})`} opacity={(beakerX > stageStartX[2] -10 && beakerX < stageStartX[3] -10) || (funnelX > stageStartX[2] -10 && funnelX < stageStartX[3] -10)? 1 : 0.3}>
+         <g
+             transform={`translate(${stageStartX[2] + stageWidth / 2 + 20}, ${stageIconY + 5})`}
+             className={cn("transition-all duration-200", stage3Active ? "scale-110 opacity-100" : "opacity-70")}
+             style={{ transformOrigin: `center center` }}
+         >
              <BeakerIcon size={16}/>
          </g>
-         <g transform={`translate(${stageStartX[2] + stageWidth / 2 + 45}, ${stageIconY + 5})`} opacity={(beakerX > stageStartX[2] -10 && beakerX < stageStartX[3] -10) || (funnelX > stageStartX[2] -10 && funnelX < stageStartX[3] -10)? 1 : 0.3}>
+         <g
+            transform={`translate(${stageStartX[2] + stageWidth / 2 + 45}, ${stageIconY + 5})`}
+            className={cn("transition-all duration-200", stage3Active ? "scale-110 opacity-100" : "opacity-70")}
+            style={{ transformOrigin: `center center` }}
+         >
              <FunnelIcon size={16}/>
          </g>
 
 
         {/* Stage 4: Art Tools */}
-        <text x={stageStartX[3]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Art Tools</text>
-         <g transform={`translate(${stageStartX[3] + stageWidth / 2 - 15}, ${stageIconY + 5})`} opacity={(brushX > stageStartX[3] -10 && brushX < stageStartX[4] -10) || (pencilX > stageStartX[3] -10 && pencilX < stageStartX[4] -10)? 1 : 0.3}>
+        <text
+          x={stageStartX[3]}
+          y={stageLabelY}
+          fontSize="10"
+          fill="hsl(var(--foreground))"
+          className={cn(
+            "transition-all duration-200",
+            stage4Active ? "font-bold scale-110 opacity-100 fill-primary" : "opacity-70"
+          )}
+          style={{ transformOrigin: `${stageStartX[3]}px ${stageLabelY}px` }}
+        >
+          Art Tools
+        </text>
+         <g
+          transform={`translate(${stageStartX[3] + stageWidth / 2 - 15}, ${stageIconY + 5})`}
+          className={cn("transition-all duration-200", stage4Active ? "scale-110 opacity-100" : "opacity-70")}
+          style={{ transformOrigin: `center center` }}
+         >
             <Paintbrush size={16} color="hsl(var(--chart-2))"/> {/* Added color */}
          </g>
-         <g transform={`translate(${stageStartX[3] + stageWidth / 2 + 15}, ${stageIconY + 5})`} opacity={(brushX > stageStartX[3] -10 && brushX < stageStartX[4] -10) || (pencilX > stageStartX[3] -10 && pencilX < stageStartX[4] -10)? 1 : 0.3}>
+         <g
+            transform={`translate(${stageStartX[3] + stageWidth / 2 + 15}, ${stageIconY + 5})`}
+            className={cn("transition-all duration-200", stage4Active ? "scale-110 opacity-100" : "opacity-70")}
+            style={{ transformOrigin: `center center` }}
+         >
              <Pencil size={16} color="hsl(var(--chart-4))"/> {/* Added color */}
          </g>
 
         {/* Stage 5: Design Apps */}
-        <text x={stageStartX[4]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Design Apps</text>
-         <g transform={`translate(${stageStartX[4] + stageWidth / 2 - 20}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[4] -10 && designToolX < stageStartX[5] -10 ? 1 : 0.3}>
+        <text
+          x={stageStartX[4]}
+          y={stageLabelY}
+          fontSize="10"
+          fill="hsl(var(--foreground))"
+          className={cn(
+            "transition-all duration-200",
+            stage5Active ? "font-bold scale-110 opacity-100 fill-primary" : "opacity-70"
+          )}
+          style={{ transformOrigin: `${stageStartX[4]}px ${stageLabelY}px` }}
+        >
+          Design Apps
+        </text>
+         <g
+            transform={`translate(${stageStartX[4] + stageWidth / 2 - 20}, ${stageIconY + 5})`}
+            className={cn("transition-all duration-200", stage5Active ? "scale-110 opacity-100" : "opacity-70")}
+            style={{ transformOrigin: `center center` }}
+         >
             <FigmaIcon />
          </g>
-         <g transform={`translate(${stageStartX[4] + stageWidth / 2 + 10}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[4] -10 && designToolX < stageStartX[5] -10 ? 1 : 0.3}>
+         <g
+            transform={`translate(${stageStartX[4] + stageWidth / 2 + 10}, ${stageIconY + 5})`}
+            className={cn("transition-all duration-200", stage5Active ? "scale-110 opacity-100" : "opacity-70")}
+            style={{ transformOrigin: `center center` }}
+         >
              <CanvaIcon />
          </g>
 
