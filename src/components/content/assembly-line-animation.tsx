@@ -135,6 +135,11 @@ const RobotIcon = ({ size = 30, armRotation = 0, eyeGlowOpacity = 1 }: { size?: 
     </defs>
     {/* Head */}
     <rect x="6" y="1" width="8" height="6" rx="1" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    {/* Antennae */}
+    <line x1="8" y1="1" x2="7" y2="-2" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    <circle cx="7" cy="-2" r="1" fill="hsl(var(--foreground))" />
+    <line x1="12" y1="1" x2="13" y2="-2" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    <circle cx="13" cy="-2" r="1" fill="hsl(var(--foreground))" />
     {/* Eyes */}
     <circle cx="9" cy="4" r="1" fill="red" filter="url(#glow-red)" style={{ opacity: eyeGlowOpacity }} />
     <circle cx="11" cy="4" r="1" fill="red" filter="url(#glow-red)" style={{ opacity: eyeGlowOpacity }} />
@@ -172,8 +177,10 @@ const AndroidIcon = ({ size = 30, armRotation = 0, eyeGlowOpacity = 1 }: { size?
     <circle cx="9" cy="4" r="1" fill="blue" filter="url(#glow-blue)" style={{ opacity: eyeGlowOpacity }} />
     <circle cx="11" cy="4" r="1" fill="blue" filter="url(#glow-blue)" style={{ opacity: eyeGlowOpacity }} />
     {/* Antennae */}
-    <line x1="8" y1="1" x2="7" y2="-1" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
-    <line x1="12" y1="1" x2="13" y2="-1" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    <line x1="8" y1="1" x2="7" y2="-2" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    <circle cx="7" cy="-2" r="1" fill="hsl(var(--foreground))" />
+    <line x1="12" y1="1" x2="13" y2="-2" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    <circle cx="13" cy="-2" r="1" fill="hsl(var(--foreground))" />
     {/* Body */}
     <rect x="4" y="8" width="12" height="10" rx="1.5" fill="green" stroke="hsl(var(--foreground))" strokeWidth="1"/>
     {/* Legs */}
@@ -491,6 +498,7 @@ export function AssemblyLineAnimation() {
    const supervisorY = 20; // Position them above the belt
    const supervisorArmFlapAngle = Math.sin(animationTime * 5) * 25; // Flapping motion
    const supervisorEyeGlow = (Math.sin(animationTime * 3) + 1) / 2; // Pulsing glow
+   const supervisorSize = 30; // Increased size
 
 
   return (
@@ -511,10 +519,10 @@ export function AssemblyLineAnimation() {
 
         {/* Supervising Figures */}
         <g transform={`translate(10, ${supervisorY})`}>
-            <RobotIcon size={25} armRotation={supervisorArmFlapAngle} eyeGlowOpacity={supervisorEyeGlow}/>
+            <RobotIcon size={supervisorSize} armRotation={supervisorArmFlapAngle} eyeGlowOpacity={supervisorEyeGlow}/>
         </g>
-        <g transform={`translate(${beltLength - 15}, ${supervisorY})`}>
-             <AndroidIcon size={25} armRotation={-supervisorArmFlapAngle} eyeGlowOpacity={supervisorEyeGlow}/>
+        <g transform={`translate(${beltLength - supervisorSize - 5}, ${supervisorY})`}> {/* Adjusted x pos for size */}
+             <AndroidIcon size={supervisorSize} armRotation={-supervisorArmFlapAngle} eyeGlowOpacity={supervisorEyeGlow}/>
         </g>
 
 
