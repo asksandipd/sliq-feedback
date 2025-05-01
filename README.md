@@ -8,12 +8,33 @@ Feedback Flow is built with a focus on simplicity and efficiency. The core idea 
 
 ## Key Features
 
+<br/>
+
+**Screenshot 1: Homepage**
+
+![Homepage Screenshot](docs/Page-1.png)
+
+*Caption: A glimpse of the Feedback Flow homepage, designed for easy navigation.*
+<br/>
+
 - **Intuitive Feedback Submission:** A straightforward form for users to provide feedback.
 - **Feedback Management Dashboard:** A centralized view for administrators to see and manage all submitted feedback.
 - **Data Visualization:** Tools and charts to help analyze feedback trends and patterns.
 - **Categorization and Filtering:** Options to organize and filter feedback for easier analysis.
 
 ## Technical Stack
+
+<br/>
+
+**Screenshot 2: Feedback Submission Form**
+
+![Feedback Submission Form Screenshot](docs/Page-2.png)
+
+*Caption: The intuitive form where users can easily submit their feedback.*
+
+<br/>
+
+
 
 Feedback Flow is built using the following technologies:
 
