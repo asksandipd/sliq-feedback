@@ -153,8 +153,11 @@ export function AssemblyLineAnimation() {
   const binX = outputX + 10;
   const binY = 70;
   const binBottomY = binY + binHeight;
-  const binDanceAmount = 2; // Amplitude for bin items dance
-
+  const binCenterX = binX + binWidth / 2;
+  const binVortexRadius = binWidth * 0.2; // Radius for vortex movement
+  const binVortexSpeed = 2.5; // Controls speed of vortex rotation
+  const binVerticalBounce = 3; // Amplitude for vertical bounce
+  const binVerticalSpeed = 1.8; // Speed for vertical bounce
 
   // Item specific animations
   const colorDropY = 15;
@@ -204,12 +207,62 @@ export function AssemblyLineAnimation() {
   const paintingColorIndex = Math.floor((animationTime * 0.5) % colors.length);
   const paintingColor = colors[paintingColorIndex];
 
-  // Calculate dance offsets for bin items
-  const binItemDanceY1 = Math.sin(animationTime * 2.0 + 0) * binDanceAmount;
-  const binItemDanceY2 = Math.sin(animationTime * 2.2 + 1) * binDanceAmount;
-  const binItemDanceY3 = Math.sin(animationTime * 1.8 + 2) * binDanceAmount;
-  const binItemDanceY4 = Math.sin(animationTime * 2.4 + 3) * binDanceAmount;
-  const binItemDanceY5 = Math.sin(animationTime * 1.9 + 4) * binDanceAmount;
+  // Calculate vortex offsets for bin items
+  // Use different speeds and offsets for each item for more randomness
+  const vortexAngle = (time: number, offset: number, speedMultiplier: number) => (time * binVortexSpeed * speedMultiplier + offset * Math.PI / 2.5) % (2 * Math.PI);
+  const verticalOffset = (time: number, offset: number, speedMultiplier: number) => Math.sin(time * binVerticalSpeed * speedMultiplier + offset) * binVerticalBounce;
+
+  const binItemTransforms = [
+      { // Circle
+          angle: vortexAngle(animationTime, 0, 1.0),
+          yOffset: verticalOffset(animationTime, 0, 1.0),
+          scale: 1 + Math.sin(animationTime * 1.5 + 0) * 0.1, // Slight pulsing scale
+          rotation: Math.sin(animationTime * 1.1 + 0) * 15,
+      },
+      { // Triangle
+          angle: vortexAngle(animationTime, 1, 1.2),
+          yOffset: verticalOffset(animationTime, 1, 1.1),
+          scale: 1 + Math.sin(animationTime * 1.6 + 1) * 0.08,
+          rotation: Math.cos(animationTime * 1.3 + 1) * 20,
+      },
+      { // Rect
+          angle: vortexAngle(animationTime, 2, 0.9),
+          yOffset: verticalOffset(animationTime, 2, 0.9),
+          scale: 1 + Math.sin(animationTime * 1.4 + 2) * 0.12,
+          rotation: Math.sin(animationTime * 1.0 + 2) * 10,
+      },
+      { // Small Circle
+          angle: vortexAngle(animationTime, 3, 1.3),
+          yOffset: verticalOffset(animationTime, 3, 1.2),
+          scale: 1 + Math.sin(animationTime * 1.7 + 3) * 0.09,
+          rotation: Math.cos(animationTime * 1.2 + 3) * 25,
+      },
+      { // Small Triangle
+          angle: vortexAngle(animationTime, 4, 1.1),
+          yOffset: verticalOffset(animationTime, 4, 1.05),
+          scale: 1 + Math.sin(animationTime * 1.55 + 4) * 0.11,
+          rotation: Math.sin(animationTime * 1.4 + 4) * 18,
+      },
+  ];
+
+  const getBinItemTransform = (index: number, baseX: number, baseY: number, shapeWidth = 0, shapeHeight = 0) => {
+      const { angle, yOffset, scale, rotation } = binItemTransforms[index];
+      const vortexX = Math.cos(angle) * binVortexRadius;
+      const vortexY = Math.sin(angle) * binVortexRadius * 0.7; // Make vortex slightly elliptical
+
+      // Translate to the vortex position + vertical bounce, then scale and rotate around center
+      // Adjust transform origin for rotation/scaling based on shape type
+      let originX = baseX;
+      let originY = baseY;
+      if (shapeWidth && shapeHeight) { // Rect/Triangle (approx center)
+         originX += shapeWidth / 2;
+         originY += shapeHeight / 2;
+      }
+
+       return `translate(${vortexX}, ${vortexY + yOffset}) rotate(${rotation}, ${originX}, ${originY}) scale(${scale})`;
+
+  };
+
 
   return (
     <div className="w-full aspect-video bg-muted/50 rounded-md overflow-hidden flex items-center justify-center p-4">
@@ -312,14 +365,33 @@ export function AssemblyLineAnimation() {
         <FunnelBin x={binX} y={binY} width={binWidth} height={binHeight} stripeColor="hsl(var(--secondary-foreground) / 0.5)" />
         <text x={binX + binWidth / 2} y={binBottomY + 12} textAnchor="middle" fontSize="10" fill="hsl(var(--secondary-foreground))">Output</text>
 
-        {/* Static art in bin - varied shapes and colors, adjusted positions for funnel */}
-        {/* Position items lower and slightly towards the center, add transform for dancing */}
-        <PaintingCircle cx={binX + binWidth/2} cy={binBottomY - 10} color={colors[1]} r={8} transform={`translate(0, ${binItemDanceY1})`} />
-        <PaintingTriangle x={binX + binWidth/2 - 15} y={binBottomY - 30} color={colors[3]} size={15} transform={`translate(0, ${binItemDanceY2})`} />
-        <PaintingRect x={binX + binWidth/2 + 2} y={binBottomY - 25} color={colors[0]} width={12} height={10} transform={`translate(0, ${binItemDanceY3})`} />
-        <PaintingCircle cx={binX + binWidth/2 + 10} cy={binBottomY - 15} color={colors[4]} r={6} transform={`translate(0, ${binItemDanceY4})`} />
-        {/* Add one more overlapping piece */}
-        <PaintingTriangle x={binX + binWidth / 2 - 5} y={binBottomY - 18} color={colors[2]} size={18} transform={`translate(0, ${binItemDanceY5})`} />
+        {/* Items dancing inside the bin using vortex logic */}
+         {/* Position items around the center of the bin base and apply vortex transform */}
+         <PaintingCircle
+             cx={binCenterX} cy={binBottomY - 10} // Base position
+             color={colors[1]} r={8}
+             transform={getBinItemTransform(0, binCenterX, binBottomY - 10)}
+         />
+         <PaintingTriangle
+             x={binCenterX - 7.5} y={binBottomY - 30} // Base position
+             color={colors[3]} size={15}
+             transform={getBinItemTransform(1, binCenterX - 7.5, binBottomY - 30, 15, 15)}
+         />
+         <PaintingRect
+             x={binCenterX + 2} y={binBottomY - 25} // Base position
+             color={colors[0]} width={12} height={10}
+             transform={getBinItemTransform(2, binCenterX + 2, binBottomY - 25, 12, 10)}
+         />
+         <PaintingCircle
+             cx={binCenterX + 10} cy={binBottomY - 15} // Base position
+             color={colors[4]} r={6}
+             transform={getBinItemTransform(3, binCenterX + 10, binBottomY - 15)}
+         />
+         <PaintingTriangle
+             x={binCenterX - 9} y={binBottomY - 18} // Base position
+             color={colors[2]} size={18}
+             transform={getBinItemTransform(4, binCenterX - 9, binBottomY - 18, 18, 18)}
+          />
 
 
       </svg>
