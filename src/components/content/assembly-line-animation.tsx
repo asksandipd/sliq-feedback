@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Paintbrush, Pencil } from 'lucide-react';
+import { Paintbrush, Pencil, Beaker, Filter as FunnelIcon } from 'lucide-react'; // Added Beaker and Filter (as Funnel)
 import { cn } from '@/lib/utils';
 
 // Updated SVG icons for design tools
@@ -30,6 +30,58 @@ const CanvaIcon = () => (
         <stop offset="1" stopColor="#A259FF"/>
       </radialGradient>
     </defs>
+ </svg>
+);
+
+// NEW SVG Icons
+const AtomIcon = ({ size = 18 }: { size?: number }) => (
+ <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" stroke="currentColor" strokeWidth="1.5"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" stroke="currentColor" strokeWidth="1.5"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" stroke="currentColor" strokeWidth="1.5"/>
+    {/* Electrons */}
+    <circle cx="12" cy="8" r="1" fill="currentColor" />
+    <circle cx="5.93" cy="14.5" r="1" fill="currentColor" />
+    <circle cx="18.07" cy="9.5" r="1" fill="currentColor" />
+ </svg>
+);
+
+const SugarIcon = ({ size = 18 }: { size?: number }) => (
+ <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+   {/* Simple hexagon for glucose/sugar ring */}
+   <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+   {/* Add a simple 'OH' group representation */}
+   <line x1="21" y1="7" x2="23" y2="5" stroke="currentColor" strokeWidth="1.5"/>
+   <circle cx="23.5" cy="4.5" r="1" fill="currentColor"/>
+ </svg>
+);
+
+const BuretteIcon = ({ size = 20 }: { size?: number }) => (
+ <svg width={size} height={size*2} viewBox="0 0 20 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Tube */}
+    <rect x="8" y="1" width="4" height="30" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    {/* Graduations */}
+    <line x1="9" y1="5" x2="11" y2="5" stroke="currentColor" strokeWidth="1"/>
+    <line x1="9" y1="10" x2="11" y2="10" stroke="currentColor" strokeWidth="1"/>
+    <line x1="9" y1="15" x2="11" y2="15" stroke="currentColor" strokeWidth="1"/>
+    <line x1="9" y1="20" x2="11" y2="20" stroke="currentColor" strokeWidth="1"/>
+    <line x1="9" y1="25" x2="11" y2="25" stroke="currentColor" strokeWidth="1"/>
+    {/* Tip */}
+    <line x1="10" y1="31" x2="10" y2="35" stroke="currentColor" strokeWidth="1.5"/>
+    {/* Stopcock */}
+    <rect x="6" y="30" width="8" height="2" fill="currentColor" rx="1"/>
+ </svg>
+);
+
+const PipetteIcon = ({ size = 20 }: { size?: number }) => (
+ <svg width={size} height={size*1.5} viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Bulb */}
+    <ellipse cx="10" cy="6" rx="5" ry="5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    {/* Tube */}
+    <rect x="8" y="10" width="4" height="15" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    {/* Tip */}
+    <line x1="10" y1="25" x2="10" y2="29" stroke="currentColor" strokeWidth="1.5"/>
  </svg>
 );
 
@@ -129,23 +181,27 @@ export function AssemblyLineAnimation() {
     };
   }, []);
 
-  const beltSpeed = 50; // Pixels per second
-  const beltLength = 500; // Corresponds to the width of the belt path
+  const beltSpeed = 40; // Reduced speed slightly
+  const beltLength = 600; // Increased belt length for more stages
   const cycleDuration = beltLength / beltSpeed; // Time for one item to cross
 
-  // Calculate item positions based on time
-  const getItemPosition = (stageStartTime: number, stageDuration: number) => {
-    const timeInCycle = (animationTime - stageStartTime) % (cycleDuration + stageDuration);
+  // Calculate item positions based on time - adding a random offset for less uniformity
+  const getItemPosition = (stageStartTime: number, stageDuration: number, initialOffset = 0) => {
+    const timeInCycle = (animationTime - stageStartTime + initialOffset) % (cycleDuration + stageDuration);
     if (timeInCycle < 0 || timeInCycle > cycleDuration) {
       return -50; // Off-screen
     }
     return (timeInCycle / cycleDuration) * beltLength;
   };
 
-  // Define stages and timing
-  const stageStartX = [20, 150, 280, 410]; // X position for start of each stage visual
-  const stageLabelY = 10; // Adjusted Y position for stage labels
-  const stageIconY = 30; // Y position for stage icons/visuals (lowered slightly)
+
+  // Define stages and timing - adjusted for more stages
+  const numStages = 6;
+  const stageWidth = beltLength / numStages;
+  const stageStartX = Array.from({ length: numStages }, (_, i) => 20 + i * stageWidth);
+  const stageLabelY = 10;
+  const stageIconY = 30; // Y position for stage icons/visuals
+
 
   const outputX = beltLength + 20;
   const binWidth = 60;
@@ -154,23 +210,78 @@ export function AssemblyLineAnimation() {
   const binY = 70;
   const binBottomY = binY + binHeight;
   const binCenterX = binX + binWidth / 2;
-  const binVortexRadius = binWidth * 0.15; // Reduced radius for vortex movement
-  const binVortexSpeed = 2.5; // Controls speed of vortex rotation
-  const binVerticalBounce = 2; // Reduced amplitude for vertical bounce
-  const binVerticalSpeed = 1.8; // Speed for vertical bounce
+  const binVortexRadius = binWidth * 0.15;
+  const binVortexSpeed = 2.5;
+  const binVerticalBounce = 2;
+  const binVerticalSpeed = 1.8;
 
   // Item specific animations
   const colorDropY = 15;
-  const itemY = 60; // Y position on the belt
-  const itemDanceAmount = 5; // Pixels for dancing effect
+  const itemY = 60;
+  const itemDanceAmount = 5;
 
   const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
   const colorX = getItemPosition(0, 1);
   const colorYOffset = Math.sin(animationTime * 5) * itemDanceAmount;
 
+  // Atom & Sugar animation
+  const atomX = getItemPosition(cycleDuration * 0.1, 1, 1);
+  const atomRotation = animationTime * 50; // Continuous rotation
+  const atomYOffset = Math.sin(animationTime * 3 + 1) * (itemDanceAmount * 0.8);
+
+  const sugarX = getItemPosition(cycleDuration * 0.15, 1, 0.5);
+  const sugarRotation = Math.cos(animationTime * 40) * 10; // Wobble rotation
+  const sugarYOffset = Math.cos(animationTime * 3.5 + 2) * (itemDanceAmount * 0.7);
+
+  // Lab equipment animation
+  const buretteX = getItemPosition(cycleDuration * 0.3, 1, 0.8);
+  const buretteRotation = Math.sin(animationTime * 2) * 5; // Gentle sway
+  const buretteYOffset = Math.sin(animationTime * 2.5 + 3) * (itemDanceAmount * 0.5);
+
+  const pipetteX = getItemPosition(cycleDuration * 0.35, 1, 0.2);
+  const pipetteRotation = Math.cos(animationTime * 2.5 + 0.5) * 6;
+  const pipetteYOffset = Math.cos(animationTime * 3 + 4) * (itemDanceAmount * 0.6);
+
+  const beakerX = getItemPosition(cycleDuration * 0.4, 1, 1.1);
+  const beakerRotation = 0; // Keep beaker upright
+  const beakerYOffset = Math.sin(animationTime * 1.5 + 5) * (itemDanceAmount * 0.4); // Slight vertical bob
+
+  const funnelX = getItemPosition(cycleDuration * 0.45, 1, 0.4);
+  const funnelRotation = Math.sin(animationTime * 3) * 8;
+  const funnelYOffset = Math.cos(animationTime * 2 + 6) * (itemDanceAmount * 0.5);
+
+
+  // Art tools animation
+  const brushX = getItemPosition(cycleDuration * 0.6, 1, 0.6);
+  const brushRotation = Math.sin(animationTime * 6) * 15;
+  const brushYOffset = Math.cos(animationTime * 4) * itemDanceAmount;
+
+  const pencilX = getItemPosition(cycleDuration * 0.65, 1, 0.9);
+  const pencilRotation = Math.cos(animationTime * 7) * 20;
+  const pencilYOffset = Math.sin(animationTime * 5 + 1) * itemDanceAmount;
+
+  // Design tools animation
+  const designToolX = getItemPosition(cycleDuration * 0.8, 1, 0.3);
+  const designToolRotation = Math.sin(animationTime * 5 - 1) * 10;
+  const designToolYOffset = Math.cos(animationTime * 6 + 2) * itemDanceAmount;
+  const DesignTool = animationTime % 4 < 2 ? FigmaIcon : CanvaIcon;
+
+  // Final Output animation
+  const paintingX = getItemPosition(cycleDuration * 0.95, 1, 0.7);
+  const paintingRectHeight = 30;
+  const fallTargetY = binY + binHeight * 0.6;
+  const paintingFallProgress = Math.max(0, Math.min(1, (paintingX - outputX + 10) / (binX - outputX + 20)));
+  const paintingFallY = itemY + paintingFallProgress * (fallTargetY - itemY);
+  const paintingFinalX = paintingFallProgress >= 1 ? binX + binWidth / 2 - 15 : paintingX;
+  const paintingFinalRotation = paintingFallProgress * 20;
+
+  const paintingColorIndex = Math.floor((animationTime * 0.5) % colors.length);
+  const paintingColor = colors[paintingColorIndex];
+
+
   // Pentagon color coordinates for Stage 1
-  const pentagonCenterX = stageStartX[0] + 40; // Center the pentagon visually
-  const pentagonCenterY = stageIconY + 15; // Lowered to avoid label overlap
+  const pentagonCenterX = stageStartX[0] + stageWidth / 2 - 10; // Center the pentagon
+  const pentagonCenterY = stageIconY + 15;
   const pentagonRadius = 15;
   const pentagonPoints = Array.from({ length: 5 }).map((_, i) => {
     const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2; // Start from top
@@ -181,40 +292,12 @@ export function AssemblyLineAnimation() {
   });
 
 
-  const brushX = getItemPosition(cycleDuration * 0.2, 1);
-  const brushRotation = Math.sin(animationTime * 6) * 15; // Degrees
-  const brushYOffset = Math.cos(animationTime * 4) * itemDanceAmount;
-
-  const pencilX = getItemPosition(cycleDuration * 0.4, 1);
-  const pencilRotation = Math.cos(animationTime * 7) * 20;
-  const pencilYOffset = Math.sin(animationTime * 5 + 1) * itemDanceAmount;
-
-  const designToolX = getItemPosition(cycleDuration * 0.6, 1);
-  const designToolRotation = Math.sin(animationTime * 5 - 1) * 10;
-  const designToolYOffset = Math.cos(animationTime * 6 + 2) * itemDanceAmount;
-  const DesignTool = animationTime % 4 < 2 ? FigmaIcon : CanvaIcon; // Alternate tools
-
-  const paintingX = getItemPosition(cycleDuration * 0.8, 1);
-  // Adjust falling logic for funnel bin
-  const paintingRectHeight = 30; // Approx height of the falling rectangle
-  const fallTargetY = binY + binHeight * 0.6; // Target Y inside the funnel, slightly lower
-  const paintingFallProgress = Math.max(0, Math.min(1, (paintingX - outputX + 10) / (binX - outputX + 20))); // Start falling a bit earlier
-  const paintingFallY = itemY + paintingFallProgress * (fallTargetY - itemY);
-  const paintingFinalX = paintingFallProgress >= 1 ? binX + binWidth / 2 - 15 : paintingX; // Center the item as it falls into bin (15 is half width of PaintingRect)
-  const paintingFinalRotation = paintingFallProgress * 20; // Add slight rotation while falling
-
-
-  const paintingColorIndex = Math.floor((animationTime * 0.5) % colors.length);
-  const paintingColor = colors[paintingColorIndex];
-
   // Calculate vortex offsets for bin items
-  // Use different speeds and offsets for each item for more randomness
   const vortexAngle = (time: number, offset: number, speedMultiplier: number) => (time * binVortexSpeed * speedMultiplier + offset * Math.PI / 2.5) % (2 * Math.PI);
   const verticalOffset = (time: number, offset: number, speedMultiplier: number) => Math.sin(time * binVerticalSpeed * speedMultiplier + offset) * binVerticalBounce;
 
-  // Base positions within the bin's lower area
-  const binBaseY = binBottomY - 15; // Slightly above the absolute bottom
-  const binBaseRadius = binWidth * 0.2; // Area within which items are initially placed
+  const binBaseY = binBottomY - 15;
+  const binBaseRadius = binWidth * 0.2;
 
   const binItemTransforms = [
       { // Circle
@@ -222,7 +305,7 @@ export function AssemblyLineAnimation() {
           baseY: binBaseY - binBaseRadius * 0.2,
           angle: vortexAngle(animationTime, 0, 1.0),
           yOffset: verticalOffset(animationTime, 0, 1.0),
-          scale: 1 + Math.sin(animationTime * 1.5 + 0) * 0.05, // Smaller scale pulse
+          scale: 1 + Math.sin(animationTime * 1.5 + 0) * 0.05,
           rotation: Math.sin(animationTime * 1.1 + 0) * 15,
       },
       { // Triangle
@@ -262,105 +345,155 @@ export function AssemblyLineAnimation() {
   const getBinItemTransform = (index: number, shapeWidth = 0, shapeHeight = 0) => {
       const { baseX, baseY, angle, yOffset, scale, rotation } = binItemTransforms[index];
       const vortexX = Math.cos(angle) * binVortexRadius;
-      const vortexY = Math.sin(angle) * binVortexRadius * 0.5; // Make vortex slightly elliptical
+      const vortexY = Math.sin(angle) * binVortexRadius * 0.5;
 
-      // Calculate the final translation: base position + vortex offset + vertical bounce
       const translateX = baseX + vortexX;
       const translateY = baseY + vortexY + yOffset;
 
-      // Adjust transform origin for rotation/scaling based on shape type
-      let originX = 0; // Relative to the shape's top-left
+      let originX = 0;
       let originY = 0;
 
-      if (shapeWidth && shapeHeight) { // Rect/Triangle (approx center)
+      if (shapeWidth && shapeHeight) {
          originX = shapeWidth / 2;
          originY = shapeHeight / 2;
-      } else if (shapeWidth) { // Circle (radius is shapeWidth here)
-          originX = shapeWidth; // cx relative to top-left is radius
-          originY = shapeWidth; // cy relative to top-left is radius
+      } else if (shapeWidth) {
+          originX = shapeWidth;
+          originY = shapeWidth;
       }
 
-       // Apply translation first, then rotation and scale around the adjusted origin
        return `translate(${translateX}, ${translateY}) rotate(${rotation}, ${originX}, ${originY}) scale(${scale})`;
   };
 
 
   return (
     <div className="w-full aspect-video bg-muted/50 rounded-md overflow-hidden flex items-center justify-center p-4">
-      <svg ref={svgRef} viewBox="0 0 600 150" width="100%" height="100%" className="overflow-visible">
+      <svg ref={svgRef} viewBox="0 0 650 150" width="100%" height="100%" className="overflow-visible"> {/* Increased viewbox width */}
         {/* Conveyor Belt */}
         <rect x="10" y="80" width={beltLength + 20} height="10" fill="hsl(var(--muted-foreground))" rx="3" />
         <rect x="10" y="50" width={beltLength + 20} height="10" fill="hsl(var(--muted-foreground))" rx="3" />
-        {/* Add lines for belt movement illusion */}
-         {[...Array(10)].map((_, i) => {
-            const lineX = 15 + ((animationTime * beltSpeed + i * (beltLength/10)) % beltLength);
+        {/* Belt movement illusion */}
+         {[...Array(15)].map((_, i) => { // Increased number of lines for longer belt
+            const lineX = 15 + ((animationTime * beltSpeed + i * (beltLength/15)) % beltLength);
             return <line key={i} x1={lineX} y1="50" x2={lineX} y2="60" stroke="hsl(var(--background))" strokeWidth="1" />;
          })}
-        {[...Array(10)].map((_, i) => {
-            const lineX = 15 + ((animationTime * beltSpeed + i * (beltLength/10)) % beltLength);
-            return <line key={i+10} x1={lineX} y1="80" x2={lineX} y2="90" stroke="hsl(var(--background))" strokeWidth="1" />;
+        {[...Array(15)].map((_, i) => {
+            const lineX = 15 + ((animationTime * beltSpeed + i * (beltLength/15)) % beltLength);
+            return <line key={i+15} x1={lineX} y1="80" x2={lineX} y2="90" stroke="hsl(var(--background))" strokeWidth="1" />;
          })}
 
 
         {/* Stage Visuals */}
         {/* Stage 1: Colors */}
-        <text x={stageStartX[0]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 1: Colors</text>
-        {/* Pentagon of Colors */}
+        <text x={stageStartX[0]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Colors</text>
         {pentagonPoints.map((point, i) => (
           <circle
             key={`color-dot-${i}`}
             cx={point.x}
             cy={point.y}
-            r="6" // Smaller radius for dots
+            r="6"
             fill={colors[i % colors.length]}
             opacity={colorX > stageStartX[0] - 10 && colorX < stageStartX[1] - 10 ? 1 : 0.3}
           />
         ))}
 
-
-        {/* Stage 2: Brushes */}
-        <text x={stageStartX[1]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 2: Brushes</text>
-        <g transform={`translate(${stageStartX[1] + 30}, ${stageIconY + 5})`} opacity={brushX > stageStartX[1] -10 && brushX < stageStartX[2] -10 ? 1 : 0.3}>
-           <Paintbrush size={16} />
+        {/* Stage 2: Basics (Atoms, Sugar) */}
+        <text x={stageStartX[1]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Basics</text>
+        <g transform={`translate(${stageStartX[1] + stageWidth / 2 - 20}, ${stageIconY + 5})`} opacity={(atomX > stageStartX[1] -10 && atomX < stageStartX[2] -10) || (sugarX > stageStartX[1] -10 && sugarX < stageStartX[2] -10) ? 1 : 0.3}>
+           <AtomIcon size={16} />
+        </g>
+         <g transform={`translate(${stageStartX[1] + stageWidth / 2 + 10}, ${stageIconY + 5})`} opacity={(atomX > stageStartX[1] -10 && atomX < stageStartX[2] -10) || (sugarX > stageStartX[1] -10 && sugarX < stageStartX[2] -10) ? 1 : 0.3}>
+           <SugarIcon size={16} />
         </g>
 
-        {/* Stage 3: Pencils */}
-        <text x={stageStartX[2]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 3: Pencils</text>
-         <g transform={`translate(${stageStartX[2] + 30}, ${stageIconY + 5})`} opacity={pencilX > stageStartX[2] -10 && pencilX < stageStartX[3] -10 ? 1 : 0.3}>
-            <Pencil size={16} />
+        {/* Stage 3: Lab Gear */}
+        <text x={stageStartX[2]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Lab Gear</text>
+         <g transform={`translate(${stageStartX[2] + stageWidth / 2 - 30}, ${stageIconY})`} opacity={(buretteX > stageStartX[2] -10 && buretteX < stageStartX[3] -10) || (pipetteX > stageStartX[2] -10 && pipetteX < stageStartX[3] -10) ? 1 : 0.3}>
+            <BuretteIcon size={12}/>
+         </g>
+         <g transform={`translate(${stageStartX[2] + stageWidth / 2 - 5}, ${stageIconY})`} opacity={(buretteX > stageStartX[2] -10 && buretteX < stageStartX[3] -10) || (pipetteX > stageStartX[2] -10 && pipetteX < stageStartX[3] -10) ? 1 : 0.3}>
+             <PipetteIcon size={12}/>
+         </g>
+         <g transform={`translate(${stageStartX[2] + stageWidth / 2 + 20}, ${stageIconY + 5})`} opacity={(beakerX > stageStartX[2] -10 && beakerX < stageStartX[3] -10) || (funnelX > stageStartX[2] -10 && funnelX < stageStartX[3] -10)? 1 : 0.3}>
+             <Beaker size={16}/>
+         </g>
+         <g transform={`translate(${stageStartX[2] + stageWidth / 2 + 45}, ${stageIconY + 5})`} opacity={(beakerX > stageStartX[2] -10 && beakerX < stageStartX[3] -10) || (funnelX > stageStartX[2] -10 && funnelX < stageStartX[3] -10)? 1 : 0.3}>
+             <FunnelIcon size={16}/>
          </g>
 
-        {/* Stage 4: Design Tools */}
-        <text x={stageStartX[3]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 4: Design Tools</text>
-         <g transform={`translate(${stageStartX[3] + 30}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
-            {/* Use updated FigmaIcon */}
+
+        {/* Stage 4: Art Tools */}
+        <text x={stageStartX[3]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Art Tools</text>
+         <g transform={`translate(${stageStartX[3] + stageWidth / 2 - 15}, ${stageIconY + 5})`} opacity={(brushX > stageStartX[3] -10 && brushX < stageStartX[4] -10) || (pencilX > stageStartX[3] -10 && pencilX < stageStartX[4] -10)? 1 : 0.3}>
+            <Paintbrush size={16} />
+         </g>
+         <g transform={`translate(${stageStartX[3] + stageWidth / 2 + 15}, ${stageIconY + 5})`} opacity={(brushX > stageStartX[3] -10 && brushX < stageStartX[4] -10) || (pencilX > stageStartX[3] -10 && pencilX < stageStartX[4] -10)? 1 : 0.3}>
+             <Pencil size={16} />
+         </g>
+
+        {/* Stage 5: Design Apps */}
+        <text x={stageStartX[4]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Design Apps</text>
+         <g transform={`translate(${stageStartX[4] + stageWidth / 2 - 20}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[4] -10 && designToolX < stageStartX[5] -10 ? 1 : 0.3}>
             <FigmaIcon />
          </g>
-         <g transform={`translate(${stageStartX[3] + 60}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
-             {/* Use updated CanvaIcon */}
+         <g transform={`translate(${stageStartX[4] + stageWidth / 2 + 10}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[4] -10 && designToolX < stageStartX[5] -10 ? 1 : 0.3}>
              <CanvaIcon />
          </g>
 
+        {/* Stage 6: Output (implicit, represented by the bin) */}
+         {/* No specific icon needed here, the bin serves as the visual */}
+
 
         {/* Animated Items */}
-        {/* Colors Pouring (simplified) */}
+        {/* Colors Pouring */}
         {colorX > 0 && colorX < beltLength && (
           <>
             <circle cx={colorX + 15} cy={colorDropY} r="5" fill={colors[0]} />
             <circle cx={colorX + 25} cy={colorDropY + 5} r="4" fill={colors[1]} />
-            {/* Splash on belt */}
             <ellipse cx={colorX + 20} cy={itemY + 5 + colorYOffset} rx="15" ry="5" fill={colors[0]} opacity="0.8" />
           </>
         )}
 
-        {/* Brushes Dancing */}
+        {/* Atoms & Sugars Dancing */}
+        {atomX > 0 && atomX < beltLength && (
+           <g transform={`translate(${atomX + 10}, ${itemY + atomYOffset}) rotate(${atomRotation}, 9, 9)`}>
+             <AtomIcon />
+           </g>
+        )}
+         {sugarX > 0 && sugarX < beltLength && (
+           <g transform={`translate(${sugarX + 10}, ${itemY + sugarYOffset}) rotate(${sugarRotation}, 9, 9)`}>
+             <SugarIcon />
+           </g>
+         )}
+
+        {/* Lab Equipment Dancing */}
+         {buretteX > 0 && buretteX < beltLength && (
+            <g transform={`translate(${buretteX + 5}, ${itemY - 15 + buretteYOffset}) rotate(${buretteRotation}, 10, 20)`}>
+              <BuretteIcon />
+            </g>
+         )}
+         {pipetteX > 0 && pipetteX < beltLength && (
+             <g transform={`translate(${pipetteX + 5}, ${itemY - 5 + pipetteYOffset}) rotate(${pipetteRotation}, 10, 15)`}>
+               <PipetteIcon />
+             </g>
+          )}
+         {beakerX > 0 && beakerX < beltLength && (
+            <g transform={`translate(${beakerX + 10}, ${itemY + beakerYOffset}) rotate(${beakerRotation}, 8, 8)`}>
+              <Beaker size={16} />
+            </g>
+         )}
+         {funnelX > 0 && funnelX < beltLength && (
+             <g transform={`translate(${funnelX + 10}, ${itemY + funnelYOffset}) rotate(${funnelRotation}, 8, 8)`}>
+               <FunnelIcon size={16} /> {/* Using Filter icon as Funnel */}
+             </g>
+          )}
+
+
+        {/* Art Tools Dancing */}
         {brushX > 0 && brushX < beltLength && (
           <g transform={`translate(${brushX + 10}, ${itemY + brushYOffset}) rotate(${brushRotation}, 8, 8)`}>
             <Paintbrush size={16} color="hsl(var(--foreground))" />
           </g>
         )}
-
-        {/* Pencils Dancing */}
         {pencilX > 0 && pencilX < beltLength && (
           <g transform={`translate(${pencilX + 10}, ${itemY + pencilYOffset}) rotate(${pencilRotation}, 8, 8)`}>
             <Pencil size={16} color="hsl(var(--foreground))" />
@@ -370,13 +503,12 @@ export function AssemblyLineAnimation() {
         {/* Design Tools Dancing */}
         {designToolX > 0 && designToolX < beltLength && (
            <g transform={`translate(${designToolX + 10}, ${itemY + designToolYOffset}) rotate(${designToolRotation}, 12, 12)`}>
-             {/* Render the selected DesignTool component */}
              <DesignTool />
            </g>
         )}
 
         {/* Output Art (Rectangle) falling into bin */}
-        {paintingX > 0 && paintingX < binX + binWidth + 10 && paintingFallProgress < 1 && ( // Only render while falling
+        {paintingX > 0 && paintingX < binX + binWidth + 10 && paintingFallProgress < 1 && (
            <g transform={`translate(${paintingFinalX}, ${paintingFallY}) rotate(${paintingFinalRotation}, 15, ${paintingRectHeight/2})`}>
               <PaintingRect x={0} y={0} color={paintingColor} height={paintingRectHeight} />
            </g>
@@ -384,10 +516,8 @@ export function AssemblyLineAnimation() {
 
 
         {/* Output Bin (Funnel) */}
-        {/* Clip path to contain shapes within the bin */}
         <defs>
            <clipPath id="binClipPath">
-               {/* Define the visual area of the bin (funnel + base) */}
                <polygon
                    points={`${binX},${binY} ${binX + binWidth},${binY} ${binX + binWidth - (binWidth - binWidth * 0.6) / 2},${binY + binHeight * 0.8} ${binX + (binWidth - binWidth * 0.6) / 2},${binY + binHeight * 0.8}`}
                 />
@@ -395,36 +525,35 @@ export function AssemblyLineAnimation() {
                    x={binX + (binWidth - binWidth * 0.6) / 2}
                    y={binY + binHeight * 0.8}
                    width={binWidth * 0.6}
-                   height={binHeight * 0.2 + 5} // Add a little extra height to clip path bottom
+                   height={binHeight * 0.2 + 5}
                 />
            </clipPath>
         </defs>
 
-        {/* Apply clip path to the group containing the dancing shapes */}
         <g clipPath="url(#binClipPath)">
-            {/* Items dancing inside the bin using vortex logic */}
+            {/* Items dancing inside the bin */}
             <PaintingCircle
-                 cx={0} cy={0} // Base position is handled by transform
+                 cx={0} cy={0}
                  color={colors[1]} r={8}
-                 transform={getBinItemTransform(0, 8, 8)} // Pass radius as width/height for origin calc
+                 transform={getBinItemTransform(0, 8, 8)}
              />
              <PaintingTriangle
-                 x={0} y={0} // Base position handled by transform
+                 x={0} y={0}
                  color={colors[3]} size={15}
                  transform={getBinItemTransform(1, 15, 15)}
              />
              <PaintingRect
-                 x={0} y={0} // Base position handled by transform
+                 x={0} y={0}
                  color={colors[0]} width={12} height={10}
                  transform={getBinItemTransform(2, 12, 10)}
              />
              <PaintingCircle
-                 cx={0} cy={0} // Base position handled by transform
+                 cx={0} cy={0}
                  color={colors[4]} r={6}
                  transform={getBinItemTransform(3, 6, 6)}
              />
              <PaintingTriangle
-                 x={0} y={0} // Base position handled by transform
+                 x={0} y={0}
                  color={colors[2]} size={18}
                  transform={getBinItemTransform(4, 18, 18)}
               />
