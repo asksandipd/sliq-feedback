@@ -87,12 +87,6 @@ body {
   }
 }
 
-/* Custom styles for feedback slider */
-.feedback-slider-container {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-}
-
-.feedback-slider-button {
-  writing-mode: horizontal-tb;
-}
+/* Removed custom styles for feedback slider as they are handled inline now */
+/* .feedback-slider-container { ... } */
+/* .feedback-slider-button { ... } */

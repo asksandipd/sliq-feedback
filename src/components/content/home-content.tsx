@@ -16,10 +16,10 @@ export function HomeContent() {
           <div className="relative aspect-video rounded-md overflow-hidden">
              <Image
                src="https://picsum.photos/1200/600"
-               alt="Abstract placeholder image"
+               alt="Art assembly line with colors and paintings" // Updated alt text
                layout="fill"
                objectFit="cover"
-               data-ai-hint="abstract tech background"
+               data-ai-hint="art assembly line colors paintings" // Updated AI hint
              />
           </div>
           <p>

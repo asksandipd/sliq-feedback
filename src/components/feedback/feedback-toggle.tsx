@@ -10,14 +10,21 @@ export function FeedbackToggle() {
 
   return (
     <>
-      <div data-feedback-ignore="true" className="fixed top-1/3 right-0 transform translate-y-[-50%] z-50 feedback-slider-container">
+      {/* Position the container using fixed positioning */}
+      <div data-feedback-ignore="true" className="fixed top-1/2 right-0 transform -translate-y-1/2 z-50">
+        {/* Use flexbox to arrange the icon and text vertically */}
         <Button
-          variant="default" // Changed to default for better visibility, uses primary color now
-          className="feedback-slider-button py-3 px-2 rounded-l-md rounded-r-none shadow-lg bg-accent hover:bg-accent/90 text-accent-foreground" // Use accent color
+          variant="default"
+          className="flex flex-col items-center justify-center h-auto py-3 px-2 rounded-l-md rounded-r-none shadow-lg bg-accent hover:bg-accent/90 text-accent-foreground" // Adjusted classes for vertical layout
           onClick={() => setIsSliderOpen(true)}
+          style={{ writingMode: 'vertical-rl' }} // Use writing-mode for vertical layout
         >
-          <MessageSquarePlus className="h-5 w-5 mr-1 inline-block" />
-          <span className="inline-block">Send Feedback</span>
+          {/* Ensure icon and text are displayed correctly */}
+           <div className="flex flex-col items-center" style={{ writingMode: 'horizontal-tb'}}> {/* Counteract writing-mode for content */}
+              <MessageSquarePlus className="h-5 w-5 mb-1" /> {/* Adjusted margin */}
+              <span>Send</span>
+              <span>Feedback</span>
+           </div>
         </Button>
       </div>
       <FeedbackSlider isOpen={isSliderOpen} onOpenChange={setIsSliderOpen} />
