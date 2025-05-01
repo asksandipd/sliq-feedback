@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Paintbrush, Pencil, Beaker as BeakerIconLucide, Filter as FunnelIconLucide } from 'lucide-react'; // Renamed imports to avoid conflict
+import { Paintbrush, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Updated SVG icons for design tools
@@ -405,8 +405,8 @@ export function AssemblyLineAnimation() {
   // Helper function to check if an item is within a specific stage
   const isItemInStage = (itemX: number, stageIndex: number) => {
     const stageStart = stageStartX[stageIndex] - 10; // Small buffer
-    const stageEnd = stageStartX[stageIndex + 1] - 10;
-    return itemX > stageStart && itemX < stageEnd;
+    const stageEnd = stageStartX[stageIndex + 1] ? stageStartX[stageIndex + 1] - 10 : beltLength + 10; // Handle last stage
+    return itemX >= stageStart && itemX < stageEnd;
   };
 
   // Stage Activation States
@@ -674,17 +674,18 @@ export function AssemblyLineAnimation() {
 
         {/* Output Bin (Funnel) */}
         <defs>
-           <clipPath id="binClipPath">
-               <polygon
-                   points={`${binX},${binY} ${binX + binWidth},${binY} ${binX + binWidth - (binWidth - binWidth * 0.6) / 2},${binY + binHeight * 0.8} ${binX + (binWidth - binWidth * 0.6) / 2},${binY + binHeight * 0.8}`}
+            <clipPath id="binClipPath">
+                {/* Define the exact shape of the funnel bin for clipping */}
+                <polygon
+                    points={`${binX},${binY} ${binX + binWidth},${binY} ${binX + binWidth - (binWidth - binWidth * 0.6) / 2},${binY + binHeight * 0.8} ${binX + (binWidth - binWidth * 0.6) / 2},${binY + binHeight * 0.8}`}
                 />
-               <rect
-                   x={binX + (binWidth - binWidth * 0.6) / 2}
-                   y={binY + binHeight * 0.8}
-                   width={binWidth * 0.6}
-                   height={binHeight * 0.2 + 5} // Add slight extra height to prevent clipping at bottom
+                <rect
+                    x={binX + (binWidth - binWidth * 0.6) / 2}
+                    y={binY + binHeight * 0.8}
+                    width={binWidth * 0.6}
+                    height={binHeight * 0.2} // Match the base rectangle height
                 />
-           </clipPath>
+            </clipPath>
         </defs>
 
         <g clipPath="url(#binClipPath)">
@@ -726,4 +727,3 @@ export function AssemblyLineAnimation() {
     </div>
   );
 }
-
