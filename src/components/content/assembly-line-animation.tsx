@@ -93,7 +93,7 @@ const PipetteIcon = ({ size = 20 }: { size?: number }) => (
  </svg>
 );
 
-const BeakerIcon = ({ size = 18 }: { size?: number }) => (
+const BeakerIcon = ({ size = 18 }: { size?: number}) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M5 3H19" stroke="hsl(var(--chart-3))" strokeWidth="1.5" strokeLinecap="round"/>
         <path d="M7 3V9C7 10.1046 7.89543 11 9 11H15C16.1046 11 17 10.1046 17 9V3" stroke="hsl(var(--chart-3))" strokeWidth="1.5"/>
@@ -119,6 +119,75 @@ const FunnelIcon = ({ size = 18 }: { size?: number }) => (
     </svg>
 );
 
+
+// NEW Robot Figure
+const RobotIcon = ({ size = 30, armRotation = 0, eyeGlowOpacity = 1 }: { size?: number; armRotation?: number; eyeGlowOpacity?: number }) => (
+ <svg width={size} height={size * 1.5} viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      {/* Glowing eye effect */}
+      <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    {/* Head */}
+    <rect x="6" y="1" width="8" height="6" rx="1" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    {/* Eyes */}
+    <circle cx="9" cy="4" r="1" fill="red" filter="url(#glow-red)" style={{ opacity: eyeGlowOpacity }} />
+    <circle cx="11" cy="4" r="1" fill="red" filter="url(#glow-red)" style={{ opacity: eyeGlowOpacity }} />
+    {/* Body */}
+    <rect x="4" y="8" width="12" height="10" rx="1.5" fill="yellow" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    {/* Legs */}
+    <rect x="6" y="19" width="3" height="6" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    <rect x="11" y="19" width="3" height="6" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    {/* Arms (Animated) */}
+    <g transform={`rotate(${armRotation}, 4, 10)`}> {/* Left Arm */}
+      <rect x="1" y="9" width="3" height="8" rx="1" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    </g>
+    <g transform={`rotate(${-armRotation}, 16, 10)`}> {/* Right Arm */}
+      <rect x="16" y="9" width="3" height="8" rx="1" fill="hsl(var(--muted-foreground))" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    </g>
+ </svg>
+);
+
+// NEW Android Figure
+const AndroidIcon = ({ size = 30, armRotation = 0, eyeGlowOpacity = 1 }: { size?: number; armRotation?: number; eyeGlowOpacity?: number }) => (
+ <svg width={size} height={size * 1.5} viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+     <defs>
+        {/* Glowing eye effect */}
+        <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+     </defs>
+    {/* Head (rounded top) */}
+    <path d="M6 4C6 2.34315 7.34315 1 9 1H11C12.6569 1 14 2.34315 14 4V7H6V4Z" fill="lightgreen" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    {/* Eyes */}
+    <circle cx="9" cy="4" r="1" fill="blue" filter="url(#glow-blue)" style={{ opacity: eyeGlowOpacity }} />
+    <circle cx="11" cy="4" r="1" fill="blue" filter="url(#glow-blue)" style={{ opacity: eyeGlowOpacity }} />
+    {/* Antennae */}
+    <line x1="8" y1="1" x2="7" y2="-1" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    <line x1="12" y1="1" x2="13" y2="-1" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    {/* Body */}
+    <rect x="4" y="8" width="12" height="10" rx="1.5" fill="green" stroke="hsl(var(--foreground))" strokeWidth="1"/>
+    {/* Legs */}
+    <rect x="6" y="19" width="3" height="6" rx="1" fill="lightgreen" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    <rect x="11" y="19" width="3" height="6" rx="1" fill="lightgreen" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    {/* Arms (Animated) */}
+    <g transform={`rotate(${armRotation}, 4, 10)`}> {/* Left Arm */}
+      <rect x="1" y="9" width="3" height="8" rx="1.5" fill="lightgreen" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    </g>
+    <g transform={`rotate(${-armRotation}, 16, 10)`}> {/* Right Arm */}
+       <rect x="16" y="9" width="3" height="8" rx="1.5" fill="lightgreen" stroke="hsl(var(--foreground))" strokeWidth="0.5"/>
+    </g>
+ </svg>
+);
 
 
 // Simple Painting representation (Rectangle)
@@ -417,6 +486,13 @@ export function AssemblyLineAnimation() {
   const stage5Active = isItemInStage(designToolX, 4);
   // Stage 6 (Output) doesn't need an active state for highlight
 
+
+   // Robot/Android animation parameters
+   const supervisorY = 20; // Position them above the belt
+   const supervisorArmFlapAngle = Math.sin(animationTime * 5) * 25; // Flapping motion
+   const supervisorEyeGlow = (Math.sin(animationTime * 3) + 1) / 2; // Pulsing glow
+
+
   return (
     <div className="w-full aspect-video bg-muted/50 rounded-md overflow-hidden flex items-center justify-center p-4">
       <svg ref={svgRef} viewBox={`0 0 ${svgWidth} 150`} width="100%" height="100%" className="overflow-visible"> {/* Adjusted viewbox width */}
@@ -432,6 +508,14 @@ export function AssemblyLineAnimation() {
             const lineX = 15 + ((animationTime * beltSpeed + i * (beltLength/15)) % beltLength);
             return <line key={i+15} x1={lineX} y1="80" x2={lineX} y2="90" stroke="hsl(var(--background))" strokeWidth="1" />;
          })}
+
+        {/* Supervising Figures */}
+        <g transform={`translate(10, ${supervisorY})`}>
+            <RobotIcon size={25} armRotation={supervisorArmFlapAngle} eyeGlowOpacity={supervisorEyeGlow}/>
+        </g>
+        <g transform={`translate(${beltLength - 15}, ${supervisorY})`}>
+             <AndroidIcon size={25} armRotation={-supervisorArmFlapAngle} eyeGlowOpacity={supervisorEyeGlow}/>
+        </g>
 
 
         {/* Stage Visuals */}
@@ -727,3 +811,4 @@ export function AssemblyLineAnimation() {
     </div>
   );
 }
+
