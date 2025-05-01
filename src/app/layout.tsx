@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head /> {/* Add explicit empty head tag to ensure proper structure */}
+      <head />{/* Ensure no space here */}
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased flex flex-col',
@@ -31,7 +31,7 @@ export default function RootLayout({
         <main className="flex-grow">{children}</main>
         <Footer />
         <Toaster /> {/* Add Toaster here */}
-      </body>
+      </body>{/* Ensure no space here */}
     </html>
   );
 }
