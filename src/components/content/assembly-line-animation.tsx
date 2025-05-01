@@ -5,21 +5,31 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Paintbrush, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Simple SVG icons for design tools (replace with actual SVGs if available)
+// Updated SVG icons for design tools
 const FigmaIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    {/* Basic representation of Figma logo */}
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-    <path d="M15.5 12c0-1.93-1.57-3.5-3.5-3.5s-3.5 1.57-3.5 3.5 1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5zm-3.5-2c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/>
-    <path d="M12 8.5c-1.93 0-3.5 1.57-3.5 3.5H10c0-.83.67-1.5 1.5-1.5V8.5zm0 5c1.93 0 3.5-1.57 3.5-3.5H14c0 .83-.67 1.5-1.5 1.5v2z"/>
-    <path d="M8.5 12c0 1.93 1.57 3.5 3.5 3.5V14c-.83 0-1.5-.67-1.5-1.5H8.5zm5 0c0-1.93-1.57-3.5-3.5-3.5V10c.83 0 1.5.67 1.5 1.5h2z"/>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Figma logo representation - using multiple paths for colors */}
+    <path d="M12 12.75C12 11.2312 13.2312 10 14.75 10C16.2688 10 17.5 11.2312 17.5 12.75V15.5H14.75C13.2312 15.5 12 14.2688 12 12.75Z" fill="#0ACF83"/>
+    <path d="M9.25 12.75C9.25 11.2312 10.4812 10 12 10V15.5C10.4812 15.5 9.25 14.2688 9.25 12.75Z" fill="#A259FF"/>
+    <path d="M9.25 10C9.25 8.48122 10.4812 7.25 12 7.25C13.5188 7.25 14.75 8.48122 14.75 10H12C10.4812 10 9.25 11.2312 9.25 12.75V10Z" fill="#F24E1E"/>
+    <path d="M14.75 10C16.2688 10 17.5 8.76878 17.5 7.25C17.5 5.73122 16.2688 4.5 14.75 4.5C13.2312 4.5 12 5.73122 12 7.25V10H14.75Z" fill="#FF7262"/>
+    <path d="M6.5 12.75C6.5 14.2688 7.73122 15.5 9.25 15.5C10.7688 15.5 12 14.2688 12 12.75V10H9.25C7.73122 10 6.5 11.2312 6.5 12.75Z" fill="#1ABCFE"/>
+    <path d="M12 18.25C10.4812 18.25 9.25 17.0188 9.25 15.5H12C13.5188 15.5 14.75 16.7312 14.75 18.25C14.75 19.7688 13.5188 21 12 21C10.4812 21 9.25 19.7688 9.25 18.25H6.5C6.5 19.7688 7.73122 21 9.25 21H12V18.25Z" fill="#0ACF83" opacity="0.3"/> {/* Added outer ring part for context */}
+    <path d="M18.5 12.75C18.5 11.2312 17.2688 10 15.75 10H14.75V15.5H15.75C17.2688 15.5 18.5 14.2688 18.5 12.75Z" fill="#A259FF" opacity="0.3"/>
   </svg>
 );
 
 const CanvaIcon = () => (
- <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-  {/* Basic representation of Canva logo */}
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3-8.5h6v2h-6zm0 3h6v2h-6z"/>
+ <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Canva logo representation - simplified gradient effect */}
+    <circle cx="12" cy="12" r="10" fill="url(#canva-gradient)" />
+    <path d="M10.7383 14.2168C10.0674 14.2168 9.51855 13.6797 9.51855 13.0088V10.9912C9.51855 10.3203 10.0674 9.7832 10.7383 9.7832C11.4092 9.7832 11.958 10.3203 11.958 10.9912V13.0088C11.958 13.6797 11.4092 14.2168 10.7383 14.2168ZM13.2617 14.2168C12.5908 14.2168 12.042 13.6797 12.042 13.0088V10.9912C12.042 10.3203 12.5908 9.7832 13.2617 9.7832C13.9326 9.7832 14.4814 10.3203 14.4814 10.9912V13.0088C14.4814 13.6797 13.9326 14.2168 13.2617 14.2168Z" fill="white"/>
+    <defs>
+      <radialGradient id="canva-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 12) rotate(90) scale(12)">
+        <stop stopColor="#37C7E7"/>
+        <stop offset="1" stopColor="#A259FF"/>
+      </radialGradient>
+    </defs>
  </svg>
 );
 
@@ -93,7 +103,7 @@ export function AssemblyLineAnimation() {
 
   // Pentagon color coordinates for Stage 1
   const pentagonCenterX = stageStartX[0] + 40; // Center the pentagon visually
-  const pentagonCenterY = stageIconY + 5; // Slightly lower than icon Y
+  const pentagonCenterY = stageIconY + 15; // Lowered to avoid label overlap
   const pentagonRadius = 15;
   const pentagonPoints = Array.from({ length: 5 }).map((_, i) => {
     const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2; // Start from top
@@ -159,22 +169,24 @@ export function AssemblyLineAnimation() {
 
         {/* Stage 2: Brushes */}
         <text x={stageStartX[1]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 2: Brushes</text>
-        <g transform={`translate(${stageStartX[1] + 30}, ${stageIconY - 5})`} opacity={brushX > stageStartX[1] -10 && brushX < stageStartX[2] -10 ? 1 : 0.3}>
+        <g transform={`translate(${stageStartX[1] + 30}, ${stageIconY + 5})`} opacity={brushX > stageStartX[1] -10 && brushX < stageStartX[2] -10 ? 1 : 0.3}>
            <Paintbrush size={16} />
         </g>
 
         {/* Stage 3: Pencils */}
         <text x={stageStartX[2]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 3: Pencils</text>
-         <g transform={`translate(${stageStartX[2] + 30}, ${stageIconY - 5})`} opacity={pencilX > stageStartX[2] -10 && pencilX < stageStartX[3] -10 ? 1 : 0.3}>
+         <g transform={`translate(${stageStartX[2] + 30}, ${stageIconY + 5})`} opacity={pencilX > stageStartX[2] -10 && pencilX < stageStartX[3] -10 ? 1 : 0.3}>
             <Pencil size={16} />
          </g>
 
         {/* Stage 4: Design Tools */}
         <text x={stageStartX[3]} y={stageLabelY} fontSize="10" fill="hsl(var(--foreground))">Stage 4: Design Tools</text>
-         <g transform={`translate(${stageStartX[3] + 30}, ${stageIconY - 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
+         <g transform={`translate(${stageStartX[3] + 30}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
+            {/* Use updated FigmaIcon */}
             <FigmaIcon />
          </g>
-         <g transform={`translate(${stageStartX[3] + 60}, ${stageIconY - 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
+         <g transform={`translate(${stageStartX[3] + 60}, ${stageIconY + 5})`} opacity={designToolX > stageStartX[3] -10 && designToolX < outputX ? 1 : 0.3}>
+             {/* Use updated CanvaIcon */}
              <CanvaIcon />
          </g>
 
@@ -207,6 +219,7 @@ export function AssemblyLineAnimation() {
         {/* Design Tools Dancing */}
         {designToolX > 0 && designToolX < beltLength && (
            <g transform={`translate(${designToolX + 10}, ${itemY + designToolYOffset}) rotate(${designToolRotation}, 12, 12)`}>
+             {/* Render the selected DesignTool component */}
              <DesignTool />
            </g>
         )}
@@ -229,5 +242,3 @@ export function AssemblyLineAnimation() {
     </div>
   );
 }
-
-    
